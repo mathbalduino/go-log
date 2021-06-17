@@ -9,6 +9,8 @@ type Logger struct {
 }
 
 func New(config Configuration) *Logger {
+	// TODO: validate config: 1) lvl and msg field names cannot be equal. 2) accept only ascii chars
+
 	return &Logger{
 		&config,
 		nil,
