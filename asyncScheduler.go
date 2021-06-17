@@ -40,7 +40,7 @@ func DefaultAsyncScheduler(nGoRoutines uint64, chanCap uint64) AsyncScheduler {
 // scheduling scheme
 type asyncScheduler struct {
 	// For every channel, there is a goroutine
-	chans    []chan Log
+	chans []chan Log
 
 	// Stores the next goroutine responsible to
 	// handle the next Log.
