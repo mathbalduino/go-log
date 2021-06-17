@@ -1,9 +1,5 @@
 package loxeLog
 
-import (
-	"gitlab.com/loxe-tools/go-base-library/util"
-)
-
 func tryRead(key string, f ...LogFields) interface{} {
 	if len(f) == 0 || len(f[0]) == 0 {
 		return nil
@@ -67,7 +63,7 @@ func LvlToString(lvl uint64) string {
 	case LvlFatal:
 		return "FATAL"
 	default:
-		return "____"
+		return "????"
 	}
 }
 
@@ -76,15 +72,15 @@ func ColorizeStrByLvl(lvl uint64, msg string) string {
 	case LvlTrace:
 		return msg
 	case LvlDebug:
-		return util.WhiteString(msg)
+		return WhiteString(msg)
 	case LvlInfo:
-		return util.CyanString(msg)
+		return CyanString(msg)
 	case LvlWarn:
-		return util.YellowString(msg)
+		return YellowString(msg)
 	case LvlError:
-		return util.RedString(msg)
+		return RedString(msg)
 	case LvlFatal:
-		return util.BoldRedString(msg)
+		return BoldRedString(msg)
 	default:
 		return msg
 	}
