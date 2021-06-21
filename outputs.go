@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
 	"strings"
 )
 
@@ -30,32 +31,38 @@ func (l *Logger) RawOutputs(output Output, outputs ...Output) *Logger {
 	return newLogger
 }
 
-// OutputToAnsiTerm will take some log and print it to the
-// terminal, using ANSI codes to colorize it accordingly to
-// the log level
-func OutputToAnsiTerm(lvl uint64, msg string, _ LogFields) {
-	msg = fmt.Sprintf("[ %s ] %s", LvlToString(lvl), strings.ReplaceAll(msg, "\n", "\n\t"))
-	fmt.Println(ColorizeStrByLvl(lvl, msg))
+// OutputToWriter will call the given parser and write the results to the given io.Writer, calling
+// 'onError' with any errors that occur
+func OutputToWriter(w io.Writer, parser func(LogFields) ([]byte, error), onError func(error)) Output {
+	return func(_ uint64, _ string, fields LogFields) {
+		data, e := parser(fields)
+		if e != nil {
+			onError(e)
+			return
+		}
+
+		_, e = w.Write(data)
+		if e != nil {
+			onError(e)
+		}
+	}
 }
 
 // OutputJsonToFile will parse the log fields to JSON and write
 // it to the given Writer interface, calling onError with any errors
-// that occur between the Write() call
+// that occur between the Marshal()/Write() call
 func OutputJsonToFile(w io.Writer, onError func(error)) Output {
-	return func(_ uint64, _ string, fields LogFields) {
-		j, e := json.Marshal(fields)
-		if e != nil {
-			onError(e)
-			return
-		}
+	return OutputToWriter(w, func(fields LogFields) ([]byte, error) { return json.Marshal(fields) }, onError)
+}
 
-		n, e := w.Write(append(j, "\n"...))
-		if e != nil {
-			onError(e)
-			return
-		}
-		if n != len(j)+1 {
-			onError(ErrIncompleteFileWrite)
-		}
-	}
+// OutputToAnsiStdout will take some log and write it to the
+// os.Stdout, using ANSI codes to colorize it accordingly to
+// the log level
+func OutputToAnsiStdout(lvlFieldName, msgFieldName string) Output {
+	return OutputToWriter(os.Stdout, func(f LogFields) ([]byte, error) {
+		lvl, msg := f[lvlFieldName].(uint64), f[msgFieldName].(string)
+		msg = fmt.Sprintf("[ %s ] %s", LvlToString(lvl), strings.ReplaceAll(msg, "\n", "\n\t"))
+		msg = ColorizeStrByLvl(lvl, msg)
+		return []byte(msg), nil
+	}, func(err error) {})
 }

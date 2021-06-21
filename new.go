@@ -16,9 +16,12 @@ type Logger struct {
 // the given configuration
 //
 // Note that if the given configuration is invalid,
-// panic will be called
+// panic will be called with the proper errors
 func New(config Configuration) *Logger {
-	// TODO: validate config: 1) lvl and msg field names cannot be equal. 2) accept only ascii chars
+	e := validateConfig(config)
+	if e != nil {
+		panic(e)
+	}
 
 	return &Logger{
 		&config,
@@ -34,6 +37,7 @@ func New(config Configuration) *Logger {
 // ANSI codes), using 'lvl' and 'msg' as level and message
 // keys and enabling only the default log levels
 func NewDefault() *Logger {
-	return New(DefaultConfig()).
-		RawOutputs(OutputToAnsiTerm)
+	config := DefaultConfig()
+	return New(config).
+		RawOutputs(OutputToAnsiStdout(config.LvlFieldName, config.MsgFieldName))
 }

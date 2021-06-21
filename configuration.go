@@ -40,3 +40,12 @@ func DefaultConfig() Configuration {
 		LvlDefaults,
 	}
 }
+
+// validateConfig will return a non-nil error
+// if the given Configuration contains errors
+func validateConfig(c Configuration) error {
+	if c.LvlFieldName == c.MsgFieldName {
+		return ErrLvlMsgSameKey
+	}
+	return nil
+}
