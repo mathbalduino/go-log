@@ -62,4 +62,7 @@ func handleLog(log Log) {
 	for _, output := range log.logger.outputs {
 		output(log.lvl, log.msg, log.fields)
 	}
+	if log.lvl == LvlFatal {
+		panic(log.msg)
+	}
 }

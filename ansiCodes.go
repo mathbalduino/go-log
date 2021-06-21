@@ -2,12 +2,13 @@ package loxeLog
 
 // The ANSI codes used to change the terminal color
 const (
-	ansiCodeReset   = "\033[0m"
-	ansiCodeRed     = "\033[31m"
-	ansiCodeBoldRed = "\033[31;1m"
-	ansiCodeYellow  = "\033[33m"
-	ansiCodeCyan    = "\033[36m"
-	ansiCodeWhite   = "\033[37m"
+	ansiCodeReset     = "\033[0m"
+	ansiCodeRed       = "\033[31m"
+	ansiCodeBoldRed   = "\033[31;1m"
+	ansiCodeYellow    = "\033[33m"
+	ansiCodeCyan      = "\033[36m"
+	ansiCodeLightGrey = "\033[37m"
+	ansiCodeDarkGrey  = "\033[90m"
 )
 
 // RedString will wrap the given string between the red and
@@ -38,12 +39,19 @@ func YellowString(msg string) string { return colorizeString(msg, ansiCodeYellow
 // the screen using cyan as the font color
 func CyanString(msg string) string { return colorizeString(msg, ansiCodeCyan) }
 
-// RedString will wrap the given string between the white and
-// reset ANSI codes.
+// LightGreyString will wrap the given string between the light
+// grey and reset ANSI codes.
 //
 // Terminals with ANSI code support will print the string to
-// the screen using white as the font color
-func WhiteString(msg string) string { return colorizeString(msg, ansiCodeWhite) }
+// the screen using light grey as the font color
+func LightGreyString(msg string) string { return colorizeString(msg, ansiCodeLightGrey) }
+
+// DarkGreyString will wrap the given string between the dark
+// grey and reset ANSI codes.
+//
+// Terminals with ANSI code support will print the string to
+// the screen using dark grey as the font color
+func DarkGreyString(msg string) string { return colorizeString(msg, ansiCodeDarkGrey) }
 
 // colorizeString will wrap the given string between the given
 // color ANSI code and the reset ANSI code.

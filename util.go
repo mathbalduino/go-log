@@ -29,9 +29,9 @@ func LvlToString(lvl uint64) string {
 func ColorizeStrByLvl(lvl uint64, msg string) string {
 	switch lvl {
 	case LvlTrace:
-		return msg
+		return DarkGreyString(msg)
 	case LvlDebug:
-		return WhiteString(msg)
+		return LightGreyString(msg)
 	case LvlInfo:
 		return CyanString(msg)
 	case LvlWarn:

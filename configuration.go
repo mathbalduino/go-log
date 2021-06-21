@@ -26,6 +26,8 @@ type Configuration struct {
 	// Note that it is intended to be used as a combination
 	// ("or" bitwise operation) of log levels
 	LvlsEnabled uint64
+
+	ErrorParser func(error) (string, LogFields)
 }
 
 // DefaultConfig creates a default Logger configuration,
@@ -38,6 +40,7 @@ func DefaultConfig() Configuration {
 		"lvl",
 		"msg",
 		LvlDefaults,
+		func(err error) (string, LogFields) { return err.Error(), nil },
 	}
 }
 

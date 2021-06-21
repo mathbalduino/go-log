@@ -52,7 +52,14 @@ func OutputToWriter(w io.Writer, parser func(LogFields) ([]byte, error), onError
 // it to the given Writer interface, calling onError with any errors
 // that occur between the Marshal()/Write() call
 func OutputJsonToFile(w io.Writer, onError func(error)) Output {
-	return OutputToWriter(w, func(fields LogFields) ([]byte, error) { return json.Marshal(fields) }, onError)
+	parser := func(fields LogFields) ([]byte, error) {
+		data, e := json.Marshal(fields)
+		if e != nil {
+			return nil, e
+		}
+		return append(data, '\n'), nil
+	}
+	return OutputToWriter(w, parser, onError)
 }
 
 // OutputToAnsiStdout will take some log and write it to the
@@ -61,7 +68,7 @@ func OutputJsonToFile(w io.Writer, onError func(error)) Output {
 func OutputToAnsiStdout(lvlFieldName, msgFieldName string) Output {
 	return OutputToWriter(os.Stdout, func(f LogFields) ([]byte, error) {
 		lvl, msg := f[lvlFieldName].(uint64), f[msgFieldName].(string)
-		msg = fmt.Sprintf("[ %s ] %s", LvlToString(lvl), strings.ReplaceAll(msg, "\n", "\n\t"))
+		msg = fmt.Sprintf("[ %s ] %s\n", LvlToString(lvl), strings.ReplaceAll(msg, "\n", "\n\t"))
 		msg = ColorizeStrByLvl(lvl, msg)
 		return []byte(msg), nil
 	}, func(err error) {})
