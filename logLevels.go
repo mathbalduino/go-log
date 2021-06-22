@@ -4,48 +4,49 @@ package loxeLog
 // given adHocFields, if enabled.
 //
 // Note that the 'adHocFields' param is variadic just to simulate
-// optional params. If it's needed, set just the first variadic
-// value (all the subsequent ones will be ignored)
+// optional params. Latter values will override former ones
 func (l *Logger) Trace(msg string, adHocFields ...LogFields) { l.Log(LvlTrace, msg, adHocFields) }
 
 // Debug will create a new log with the Debug level, using the
 // given adHocFields, if enabled.
 //
 // Note that the 'adHocFields' param is variadic just to simulate
-// optional params. If it's needed, set just the first variadic
-// value (all the subsequent ones will be ignored)
+// optional params. Latter values will override former ones
 func (l *Logger) Debug(msg string, adHocFields ...LogFields) { l.Log(LvlDebug, msg, adHocFields) }
 
 // Info will create a new log with the Info level, using the
 // given adHocFields, if enabled.
 //
 // Note that the 'adHocFields' param is variadic just to simulate
-// optional params. If it's needed, set just the first variadic
-// value (all the subsequent ones will be ignored)
+// optional params. Latter values will override former ones
 func (l *Logger) Info(msg string, adHocFields ...LogFields) { l.Log(LvlInfo, msg, adHocFields) }
 
 // Warn will create a new log with the Warn level, using the
 // given adHocFields, if enabled.
 //
 // Note that the 'adHocFields' param is variadic just to simulate
-// optional params. If it's needed, set just the first variadic
-// value (all the subsequent ones will be ignored)
+// optional params. Latter values will override former ones
 func (l *Logger) Warn(msg string, adHocFields ...LogFields) { l.Log(LvlWarn, msg, adHocFields) }
 
 // Error will create a new log with the Error level, using the
 // given adHocFields, if enabled.
 //
 // Note that the 'adHocFields' param is variadic just to simulate
-// optional params. If it's needed, set just the first variadic
-// value (all the subsequent ones will be ignored)
+// optional params. Latter values will override former ones
 func (l *Logger) Error(msg string, adHocFields ...LogFields) { l.Log(LvlError, msg, adHocFields) }
+
+// Fatal will create a new log with the Fatal level, using the
+// given adHocFields, if enabled.
+//
+// Note that the 'adHocFields' param is variadic just to simulate
+// optional params. Latter values will override former ones
+func (l *Logger) Fatal(msg string, adHocFields ...LogFields) { l.Log(LvlFatal, msg, adHocFields) }
 
 // ErrorFrom will create a new log with the Error level, using the
 // given error and adHocFields, if enabled.
 //
 // Note that the 'adHocFields' param is variadic just to simulate
-// optional params. If it's needed, set just the first variadic
-// value (all the subsequent ones will be ignored)
+// optional params. Latter values will override former ones
 //
 // Note that this method will call the 'ErrorParser' configured
 // function to extract the log message and custom fields from the
@@ -54,27 +55,17 @@ func (l *Logger) Error(msg string, adHocFields ...LogFields) { l.Log(LvlError, m
 func (l *Logger) ErrorFrom(e error, adHocFields ...LogFields) {
 	msg, f := l.configuration.ErrorParser(e)
 	if f != nil {
-		mergeOverriding(f, adHocFields...)
-		l.Error(msg, f)
+		l.Error(msg, append([]LogFields{f}, adHocFields...)...)
 	} else {
 		l.Error(msg, adHocFields...)
 	}
 }
 
-// Fatal will create a new log with the Fatal level, using the
-// given adHocFields, if enabled.
-//
-// Note that the 'adHocFields' param is variadic just to simulate
-// optional params. If it's needed, set just the first variadic
-// value (all the subsequent ones will be ignored)
-func (l *Logger) Fatal(msg string, adHocFields ...LogFields) { l.Log(LvlFatal, msg, adHocFields) }
-
 // FatalFrom will create a new log with the Fatal level, using the
 // given error and adHocFields, if enabled.
 //
 // Note that the 'adHocFields' param is variadic just to simulate
-// optional params. If it's needed, set just the first variadic
-// value (all the subsequent ones will be ignored)
+// optional params. Latter values will override former ones
 //
 // Note that this method will call the 'ErrorParser' configured
 // function to extract the log message and custom fields from the
@@ -83,19 +74,18 @@ func (l *Logger) Fatal(msg string, adHocFields ...LogFields) { l.Log(LvlFatal, m
 func (l *Logger) FatalFrom(e error, adHocFields ...LogFields) {
 	msg, f := l.configuration.ErrorParser(e)
 	if f != nil {
-
+		l.Fatal(msg, append([]LogFields{f}, adHocFields...)...)
+	} else {
+		l.Fatal(msg, adHocFields...)
 	}
-	l.Fatal(msg, adHocFields...)
 }
 
 // Log is the base method that creates a new log, being used by all
 // other log methods (Trace, Debug, Warn, ...). If there's the need
 // to create custom log levels, use this method.
 //
-// Note that the 'adHocFields' param is implemented as a variadic by
-// all the other log methods (Trace, Debug, Warn, ...), so the 'adHocFields'
-// param is an slice. Note that this method will use just the first index of
-// this slice, ignoring the subsequent ones
+// Note that the 'adHocFields' param is variadic just to simulate
+// optional params. Latter values will override former ones
 func (l *Logger) Log(lvl uint64, msg string, adHocFields []LogFields) {
 	if notEnabled(l.configuration.LvlsEnabled, lvl) {
 		return

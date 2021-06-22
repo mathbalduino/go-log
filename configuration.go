@@ -27,13 +27,17 @@ type Configuration struct {
 	// ("or" bitwise operation) of log levels
 	LvlsEnabled uint64
 
+	// ErrorParser is a function that takes an error and
+	// return a msg string and an optional collection of fields
+	// (used by ErrorFrom and FatalFrom methods)
 	ErrorParser func(error) (string, LogFields)
 }
 
 // DefaultConfig creates a default Logger configuration,
 // with a synchronous approach (nil AsyncScheduler),
-// omitting only Trace logs and using "lvl" and "msg"
-// as LvlFieldName and MsgFieldName, respectively
+// omitting only Trace logs, using "lvl" and "msg"
+// as LvlFieldName and MsgFieldName, respectively, and
+// extracting only the error message via 'ErrorParser'
 func DefaultConfig() Configuration {
 	return Configuration{
 		nil,

@@ -73,15 +73,17 @@ func cloneOrNew(f LogFields) LogFields {
 	return n
 }
 
-// mergeOverriding will copy the values from srcs[0] to dest,
-// overriding any existing values
+// mergeOverriding will copy the values from all srcs to dest,
+// overriding any existing values, in order
 func mergeOverriding(dest LogFields, srcs ...LogFields) {
 	if len(srcs) == 0 {
 		return
 	}
 
-	for key, value := range srcs[0] {
-		dest[key] = value
+	for _, fields := range srcs {
+		for key, value := range fields {
+			dest[key] = value
+		}
 	}
 }
 
