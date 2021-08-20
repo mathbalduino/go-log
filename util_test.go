@@ -1,6 +1,7 @@
 package loxeLog
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -161,3 +162,167 @@ func TestTryRead(t *testing.T) {
 		}
 	})
 }
+
+func TestCloneOrNew(t *testing.T) {
+	t.Run("If the given fields is empty/nil, return a new, non-nil, empty fields", func(t *testing.T) {
+		f := cloneOrNew(nil)
+		if f == nil {
+			t.Fatalf("Not expected to be nil")
+		}
+		if len(f) != 0 {
+			t.Fatalf("Expected to return an empty fields")
+		}
+
+		f = cloneOrNew(LogFields{})
+		if f == nil {
+			t.Fatalf("Not expected to be nil")
+		}
+		if len(f) != 0 {
+			t.Fatalf("Expected to return an empty fields")
+		}
+	})
+	t.Run("Should always return a new, different LogFields", func(t *testing.T) {
+		p := LogFields{}
+		f := cloneOrNew(p)
+		if reflect.ValueOf(p).Pointer() == reflect.ValueOf(f).Pointer() {
+			t.Fatalf("Expected to return a different map, not the same")
+		}
+	})
+	t.Run("Should copy all the given LogFields entries and values, returning a new LogFields", func(t *testing.T) {
+		p := LogFields{"a": "aa", "b": "bb", "c": "cc"}
+		f := cloneOrNew(p)
+		if reflect.ValueOf(p).Pointer() == reflect.ValueOf(f).Pointer() {
+			t.Fatalf("Expected to return a different map, not the same")
+		}
+		if !reflect.DeepEqual(p, f) {
+			t.Fatalf("Expected the returned map to be equivalent to the given one")
+		}
+	})
+}
+
+func TestMergeOverriding(t *testing.T) {
+	t.Run("If the len of the variadic param is zero, just exit, ignoring the dest param", func(t *testing.T) {
+		dest := LogFields{"a": "aaa"}
+		mergeOverriding(dest)
+		if len(dest) != 1 || dest["a"] != "aaa" {
+			t.Fatalf("Not expected to apply side effects to the dest param")
+		}
+	})
+	t.Run("Should copy all the variadic params to the dest param. The later always overrides the previous", func(t *testing.T) {
+		dest := LogFields{"a": "aaa"}
+		mergeOverriding(dest,
+			LogFields{"c": "ccc", "d": "ddd"},
+			LogFields{"t": "ttt"},
+			LogFields{"c": "CCC", "p": "ppp"},
+			LogFields{"a": "AAA", "t": "TTT"})
+		if len(dest) != 5 {
+			t.Fatalf("The dest arg doesn't have the correct len")
+		}
+		if dest["a"] != "AAA" || dest["c"] != "CCC" || dest["t"] != "TTT" || dest["p"] != "ppp" || dest["d"] != "ddd" {
+			t.Fatalf("The dest arg doesn't contains the correct overrided values")
+		}
+	})
+}
+
+func TestMergeOverriding_(t *testing.T) {
+	t.Run("If the len of the variadic param is zero, just exit, ignoring the dest param", func(t *testing.T) {
+		fnA := func(log Log) interface{} { return nil }
+		dest := Hooks{"a": fnA}
+		mergeOverriding_(dest)
+		if len(dest) != 1 || reflect.ValueOf(dest["a"]).Pointer() != reflect.ValueOf(fnA).Pointer() {
+			t.Fatalf("Not expected to apply side effects to the dest param")
+		}
+	})
+	t.Run("Should copy just the FIRST variadic param to the dest param, overriding", func(t *testing.T) {
+		fnA := func(log Log) interface{} { return nil }
+		fnAA := func(log Log) interface{} { return nil }
+		fnB := func(log Log) interface{} { return nil }
+		fnC := func(log Log) interface{} { return nil }
+		fnD := func(log Log) interface{} { return nil }
+		fnE := func(log Log) interface{} { return nil }
+		dest := Hooks{"a": fnA}
+		mergeOverriding_(dest,
+			Hooks{"b": fnB, "a": fnAA},
+			Hooks{"d": fnD},
+			Hooks{"b": fnC, "e": fnE},
+			Hooks{"a": fnAA, "d": nil})
+		if len(dest) != 2 {
+			t.Fatalf("The dest arg doesn't have the correct len")
+		}
+		if reflect.ValueOf(dest["a"]).Pointer() != reflect.ValueOf(fnAA).Pointer() ||
+			reflect.ValueOf(dest["b"]).Pointer() != reflect.ValueOf(fnB).Pointer() {
+			t.Fatalf("The dest arg doesn't contains the correct overrided values")
+		}
+	})
+}
+
+func TestApplyHooks(t *testing.T) {
+	t.Run("If the given hooks are empty, noop", func(t *testing.T) {
+		f := LogFields{"a": "aaa"}
+		applyHooks(Log{}, f, nil)
+		if len(f) != 1 || f["a"] != "aaa" {
+			t.Fatalf("Not expected to change the given LogFields")
+		}
+	})
+	t.Run("Should call each hook, passing the given log as argument, setting the equivalent LogField key/value", func(t *testing.T) {
+		msg := "Some Log Msg"
+		callsA, callsB, callsC := 0, 0, 0
+		h := Hooks{
+			"a": func(log Log) interface{} {
+				callsA += 1
+				if log.msg != msg {
+					t.Fatalf("Expected to pass the correct log to each hook")
+				}
+				return "aaa"
+			},
+			"b": func(log Log) interface{} {
+				callsB += 1
+				if log.msg != msg {
+					t.Fatalf("Expected to pass the correct log to each hook")
+				}
+				return "bbb"
+			},
+			"c": func(log Log) interface{} {
+				callsC += 1
+				if log.msg != msg {
+					t.Fatalf("Expected to pass the correct log to each hook")
+				}
+				return "ccc"
+			},
+		}
+
+		f := LogFields{"a": "aaa"}
+		applyHooks(Log{msg: msg}, f, h)
+		if len(f) != 3 || f["a"] != "aaa" || f["b"] != "bbb" || f["c"] != "ccc" {
+			t.Fatalf("Expected to set the given LogFields entry to the return of each hooks")
+		}
+		if callsA != 1 || callsB != 1 || callsC != 1 {
+			t.Fatalf("Each hook must be called just one time")
+		}
+	})
+}
+
+func TestNotEnabled(t *testing.T) {
+	t.Run("If the bitwise AND operation between the integers return zero, it's not enabled, return true", func(t *testing.T) {
+		flags := uint64(0b1010)
+		logLv := uint64(0b0101)
+		if !notEnabled(flags, logLv) {
+			t.Fatalf("Expected to return true")
+		}
+	})
+	t.Run("If there's two (or more) equivalent bits set to 1, return false", func(t *testing.T) {
+		flags := uint64(0b1011)
+		logLv := uint64(0b1101)
+		if notEnabled(flags, logLv) {
+			t.Fatalf("Expected to return false")
+		}
+	})
+	t.Run("If one of them is zero, return true", func(t *testing.T) {
+		flags := uint64(0)
+		logLv := uint64(0b1111)
+		if !notEnabled(flags, logLv) {
+			t.Fatalf("Expected to return true")
+		}
+	})
+}
+
