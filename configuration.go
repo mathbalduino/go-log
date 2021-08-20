@@ -50,7 +50,9 @@ func DefaultConfig() Configuration {
 
 // validateConfig will return a non-nil error
 // if the given Configuration contains errors
-func validateConfig(c Configuration) error {
+//
+// Using 'var' just to ease tests
+var validateConfig = func(c Configuration) error {
 	if c.LvlFieldName == c.MsgFieldName {
 		return ErrLvlMsgSameKey
 	}

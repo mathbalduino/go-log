@@ -2,7 +2,7 @@ package loxeLog
 
 // Logger is a struct that represents
 // a base log template, that contains
-// basic information to create/persist
+// basic information on how to handle
 // new logs
 type Logger struct {
 	configuration *Configuration
