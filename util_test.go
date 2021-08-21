@@ -200,6 +200,48 @@ func TestCloneOrNew(t *testing.T) {
 	})
 }
 
+func TestCloneOrNew_(t *testing.T) {
+	t.Run("If the given hooks param is empty/nil, return a new, non-nil, empty hooks", func(t *testing.T) {
+		f := cloneOrNew_(nil)
+		if f == nil {
+			t.Fatalf("Not expected to be nil")
+		}
+		if len(f) != 0 {
+			t.Fatalf("Expected to return an empty Hooks")
+		}
+
+		f = cloneOrNew_(Hooks{})
+		if f == nil {
+			t.Fatalf("Not expected to be nil")
+		}
+		if len(f) != 0 {
+			t.Fatalf("Expected to return an empty Hooks")
+		}
+	})
+	t.Run("Should always return a new, different Hooks", func(t *testing.T) {
+		p := Hooks{}
+		f := cloneOrNew_(p)
+		if reflect.ValueOf(p).Pointer() == reflect.ValueOf(f).Pointer() {
+			t.Fatalf("Expected to return a different map, not the same")
+		}
+	})
+	t.Run("Should copy all the given Hooks entries and values, returning a new Hooks", func(t *testing.T) {
+		fnA := func(log Log) interface{} { return nil }
+		fnB := func(log Log) interface{} { return nil }
+		fnC := func(log Log) interface{} { return nil }
+		p := Hooks{"a": fnA, "b": fnB, "c": fnC}
+		f := cloneOrNew_(p)
+		if reflect.ValueOf(p).Pointer() == reflect.ValueOf(f).Pointer() {
+			t.Fatalf("Expected to return a different map, not the same")
+		}
+		if reflect.ValueOf(f["a"]).Pointer() != reflect.ValueOf(fnA).Pointer() ||
+			reflect.ValueOf(f["b"]).Pointer() != reflect.ValueOf(fnB).Pointer() ||
+			reflect.ValueOf(f["c"]).Pointer() != reflect.ValueOf(fnC).Pointer() {
+			t.Fatalf("Expected the returned map to be equivalent to the given one")
+		}
+	})
+}
+
 func TestMergeOverriding(t *testing.T) {
 	t.Run("If the len of the variadic param is zero, just exit, ignoring the dest param", func(t *testing.T) {
 		dest := LogFields{"a": "aaa"}
@@ -326,3 +368,75 @@ func TestNotEnabled(t *testing.T) {
 	})
 }
 
+func TestCloneLogger(t *testing.T) {
+	t.Run("Should return a different Logger pointer", func(t *testing.T) {
+		l := &Logger{}
+		l2 := cloneLogger(l)
+		if reflect.ValueOf(l2).Pointer() == reflect.ValueOf(l).Pointer() {
+			t.Fatalf("Expected to return a new Logger, not the same")
+		}
+	})
+	t.Run("Should just copy the configuration pointer", func(t *testing.T) {
+		l := &Logger{configuration: &Configuration{}}
+		l2 := cloneLogger(l)
+		if reflect.ValueOf(l2.configuration).Pointer() != reflect.ValueOf(l.configuration).Pointer() {
+			t.Fatalf("Expected to return a new Logger with the same configuration")
+		}
+	})
+	t.Run("Should clone the fields into a new LogFields", func(t *testing.T) {
+		l := &Logger{fields: LogFields{"a": "aaa", "b": "bbb", "c": "ccc"}}
+		l2 := cloneLogger(l)
+		if reflect.ValueOf(l2.fields).Pointer() == reflect.ValueOf(l.fields).Pointer() {
+			t.Fatalf("Expected to return a Logger with a new LogFields")
+		}
+		if !reflect.DeepEqual(l2.fields, l.fields) {
+			t.Fatalf("Expected the new Logger.fields to be equivalent")
+		}
+	})
+	t.Run("Should clone the syncHooks into a new Hooks", func(t *testing.T) {
+		fnA := func(log Log) interface{} { return nil }
+		fnB := func(log Log) interface{} { return nil }
+		fnC := func(log Log) interface{} { return nil }
+		l := &Logger{syncHooks: Hooks{"a": fnA, "b": fnB, "c": fnC}}
+		l2 := cloneLogger(l)
+		if reflect.ValueOf(l2.syncHooks).Pointer() == reflect.ValueOf(l.syncHooks).Pointer() {
+			t.Fatalf("Expected to return a Logger with a new syncHooks")
+		}
+		if reflect.ValueOf(l2.syncHooks["a"]).Pointer() != reflect.ValueOf(l.syncHooks["a"]).Pointer() ||
+			reflect.ValueOf(l2.syncHooks["b"]).Pointer() != reflect.ValueOf(l.syncHooks["b"]).Pointer() ||
+			reflect.ValueOf(l2.syncHooks["c"]).Pointer() != reflect.ValueOf(l.syncHooks["c"]).Pointer() {
+			t.Fatalf("Expected the new Logger.syncHooks to be equivalent")
+		}
+	})
+	t.Run("Should clone the asyncHooks into a new Hooks", func(t *testing.T) {
+		fnA := func(log Log) interface{} { return nil }
+		fnB := func(log Log) interface{} { return nil }
+		fnC := func(log Log) interface{} { return nil }
+		l := &Logger{asyncHooks: Hooks{"a": fnA, "b": fnB, "c": fnC}}
+		l2 := cloneLogger(l)
+		if reflect.ValueOf(l2.asyncHooks).Pointer() == reflect.ValueOf(l.asyncHooks).Pointer() {
+			t.Fatalf("Expected to return a Logger with a new asyncHooks")
+		}
+		if reflect.ValueOf(l2.asyncHooks["a"]).Pointer() != reflect.ValueOf(l.asyncHooks["a"]).Pointer() ||
+			reflect.ValueOf(l2.asyncHooks["b"]).Pointer() != reflect.ValueOf(l.asyncHooks["b"]).Pointer() ||
+			reflect.ValueOf(l2.asyncHooks["c"]).Pointer() != reflect.ValueOf(l.asyncHooks["c"]).Pointer() {
+			t.Fatalf("Expected the new Logger.asyncHooks to be equivalent")
+		}
+	})
+	t.Run("Should clone the outputs slice into a new []Output", func(t *testing.T) {
+		outA := func(lvl uint64, msg string, fields LogFields) {}
+		outB := func(lvl uint64, msg string, fields LogFields) {}
+		outC := func(lvl uint64, msg string, fields LogFields) {}
+		l := &Logger{outputs: []Output{outA, outB, outC}}
+		l2 := cloneLogger(l)
+		if reflect.ValueOf(l2.outputs).Pointer() == reflect.ValueOf(l.outputs).Pointer() {
+			t.Fatalf("Expected to return a Logger with a new outputs")
+		}
+		if len(l2.outputs) != 3 ||
+			reflect.ValueOf(l2.outputs[0]).Pointer() != reflect.ValueOf(l.outputs[0]).Pointer() ||
+			reflect.ValueOf(l2.outputs[1]).Pointer() != reflect.ValueOf(l.outputs[1]).Pointer() ||
+			reflect.ValueOf(l2.outputs[2]).Pointer() != reflect.ValueOf(l.outputs[2]).Pointer() {
+			t.Fatalf("Expected the new Logger.outputs to be equivalent")
+		}
+	})
+}

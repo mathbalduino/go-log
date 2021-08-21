@@ -45,6 +45,8 @@ func ColorizeStrByLvl(lvl uint64, msg string) string {
 	}
 }
 
+// -----
+
 // tryRead will read the given key from some LogFields,
 // returning nil if it's not present
 //
@@ -67,6 +69,17 @@ func tryRead(key string, f ...LogFields) interface{} {
 // returns a new empty LogFields
 func cloneOrNew(f LogFields) LogFields {
 	n := LogFields{}
+	for key, value := range f {
+		n[key] = value
+	}
+	return n
+}
+
+// cloneOrNew_ will create a new Hooks and
+// copy all values from the given param. If nil/empty,
+// returns a new empty Hooks
+func cloneOrNew_(f Hooks) Hooks {
+	n := Hooks{}
 	for key, value := range f {
 		n[key] = value
 	}
@@ -114,11 +127,13 @@ func notEnabled(flags uint64, logLvl uint64) bool { return (flags & logLvl) == 0
 // cloneLogger will create a new identical Logger
 // instance from the given one
 func cloneLogger(l *Logger) *Logger {
+	outputs := make([]Output, len(l.outputs))
+	copy(outputs, l.outputs)
 	return &Logger{
 		configuration: l.configuration,
-		fields:        l.fields,
-		syncHooks:     l.syncHooks,
-		asyncHooks:    l.asyncHooks,
-		outputs:       l.outputs,
+		fields:        cloneOrNew(l.fields),
+		syncHooks:     cloneOrNew_(l.syncHooks),
+		asyncHooks:    cloneOrNew_(l.asyncHooks),
+		outputs:       outputs,
 	}
 }
