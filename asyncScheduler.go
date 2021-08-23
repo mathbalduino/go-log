@@ -1,6 +1,10 @@
 package loxeLog
 
-import "sync/atomic"
+import (
+	"context"
+	"sync"
+	"sync/atomic"
+)
 
 // AsyncScheduler is used as a source of channels
 // that are used to send new Logs to worker goroutines,
@@ -9,6 +13,10 @@ type AsyncScheduler interface {
 	// NextChannel must return a valid, non-nil,
 	// receive-only channel
 	NextChannel() chan<- Log
+
+	// Shutdown must send a signal (and wait response)
+	// to the running go routines, exiting them
+	Shutdown()
 }
 
 // DefaultAsyncScheduler will create one channel by goroutine, with the given
@@ -21,13 +29,17 @@ func DefaultAsyncScheduler(nGoRoutines uint64, chanCap uint64) AsyncScheduler {
 		return nil
 	}
 
+	ctx, cancelFn := context.WithCancel(context.Background())
 	scheduler := &asyncScheduler{
 		make([]chan Log, nGoRoutines),
 		0,
+		cancelFn,
+		&sync.WaitGroup{},
 	}
+	scheduler.wg.Add(int(nGoRoutines))
 	for i := range scheduler.chans {
 		scheduler.chans[i] = make(chan Log, chanCap)
-		go AsyncHandleLog(scheduler.chans[i])
+		go AsyncHandleLog(ctx, scheduler.chans[i], scheduler.wg)
 	}
 
 	return scheduler
@@ -48,10 +60,24 @@ type asyncScheduler struct {
 	// Note that this variable can overflow, but
 	// it's not a big deal, just apply mod(n_channels)
 	nextChan uint64
+
+	// When called, will close the go routines context
+	// Done() channel, exiting them
+	cancelFn context.CancelFunc
+
+	// Used to wait for the go routines exit
+	wg *sync.WaitGroup
+}
+
+// Shutdown will call the cancel function, closing the go
+// routines context channel, and wait for them to exit (via waitGroup)
+func (a *asyncScheduler) Shutdown() {
+	a.cancelFn()
+	a.wg.Wait()
 }
 
 // NextChannel selects the next channel to be used,
-// using a round-robin like scheduling scheme, applying
+// using a round-robin-like scheduling scheme, applying
 // some mod operation to avoid overflow issues
 func (a *asyncScheduler) NextChannel() chan<- Log {
 	currChannel := (atomic.AddUint64(&a.nextChan, 1) - 1) % uint64(len(a.chans))
@@ -65,13 +91,22 @@ func (a *asyncScheduler) NextChannel() chan<- Log {
 // Note that this function must be used to implement
 // custom async strategies, since it's the only way
 // to access the internal "handleLog" function
-func AsyncHandleLog(c <-chan Log) {
-	if c == nil {
+func AsyncHandleLog(ctx context.Context, c <-chan Log, wg *sync.WaitGroup) {
+	if wg == nil {
+		return
+	}
+
+	defer wg.Done()
+	if ctx == nil || c == nil {
 		return
 	}
 
 	for {
-		log := <-c
-		handleLog(log)
+		select {
+		case log := <-c:
+			handleLog(log)
+		case <-ctx.Done():
+			return
+		}
 	}
 }
