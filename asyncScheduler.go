@@ -96,7 +96,9 @@ var atomicAddUint64 = atomic.AddUint64
 // Note that this function must be used to implement
 // custom async strategies, since it's the only way
 // to access the internal "handleLog" function
-func AsyncHandleLog(ctx context.Context, c <-chan Log, wg *sync.WaitGroup) {
+//
+// Using "var" just to ease tests
+var AsyncHandleLog = func(ctx context.Context, c <-chan Log, wg *sync.WaitGroup) {
 	if wg == nil {
 		return
 	}
