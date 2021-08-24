@@ -29,7 +29,7 @@ func DefaultAsyncScheduler(nGoRoutines uint64, chanCap uint64) AsyncScheduler {
 		return nil
 	}
 
-	ctx, cancelFn := context.WithCancel(context.Background())
+	ctx, cancelFn := contextWithCancel(context.Background())
 	scheduler := &asyncScheduler{
 		make([]chan Log, nGoRoutines),
 		0,
@@ -44,6 +44,8 @@ func DefaultAsyncScheduler(nGoRoutines uint64, chanCap uint64) AsyncScheduler {
 
 	return scheduler
 }
+
+var contextWithCancel = context.WithCancel
 
 // -----
 
@@ -80,9 +82,12 @@ func (a *asyncScheduler) Shutdown() {
 // using a round-robin-like scheduling scheme, applying
 // some mod operation to avoid overflow issues
 func (a *asyncScheduler) NextChannel() chan<- Log {
-	currChannel := (atomic.AddUint64(&a.nextChan, 1) - 1) % uint64(len(a.chans))
+	currChannel := (atomicAddUint64(&a.nextChan, 1) - 1) % uint64(len(a.chans))
 	return a.chans[currChannel]
 }
+
+// just to ease tests
+var atomicAddUint64 = atomic.AddUint64
 
 // AsyncHandleLog will wait on the given send-only
 // channel, and forwarding any received Log to the
