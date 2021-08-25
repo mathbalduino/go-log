@@ -3,14 +3,19 @@ package loxeLog
 import (
 	"context"
 	"reflect"
+	"sort"
 	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
 )
 
-var contextWithCancelMutex = &sync.Mutex{}
-var asyncHandleLogMutex = &sync.Mutex{}
+var (
+	rContextWithCancel = newResource()
+	rAsyncHandleLog    = newResource()
+	rNewWaitGroup      = newResource()
+	rAtomicAddUint64   = newResource()
+)
 
 func TestDefaultAsyncScheduler(t *testing.T) {
 	t.Run("Should return nil if its given 0 go routines", func(t *testing.T) {
@@ -19,7 +24,7 @@ func TestDefaultAsyncScheduler(t *testing.T) {
 			t.Fatalf("Expected to be nil")
 		}
 	})
-	t.Run("Should create a channel for every go routine", func(t *testing.T) {
+	t.Run("Should create a unique channel (w/ the correct cap) for every go routine", func(t *testing.T) {
 		nGoRoutines := uint64(5)
 		chansCap := uint64(3)
 		a := DefaultAsyncScheduler(nGoRoutines, chansCap).(*asyncScheduler)
@@ -45,10 +50,7 @@ func TestDefaultAsyncScheduler(t *testing.T) {
 		}
 		a.Shutdown()
 	})
-	t.Run("Should set the cancelFn to the one returned by the contextWithCancel", func(t *testing.T) {
-		contextWithCancelMutex.Lock()
-		defer contextWithCancelMutex.Unlock()
-
+	t.Run("Should set the cancelFn to the one returned by the contextWithCancel", raceFreeTest(func(t *testing.T) {
 		ctx, cancelFn := context.WithCancel(context.Background())
 		contextWithCancel = func(parent context.Context) (context.Context, context.CancelFunc) {
 			return ctx, cancelFn
@@ -59,49 +61,30 @@ func TestDefaultAsyncScheduler(t *testing.T) {
 		}
 		a.Shutdown()
 		contextWithCancel = context.WithCancel
-	})
-	t.Run("Should set a not nil waitGroup and add the number of goRoutines", func(t *testing.T) {
+	}, rContextWithCancel))
+	t.Run("Should set a not nil waitGroup and increment it's counter by the number of goRoutines", raceFreeTest(func(t *testing.T) {
+		calls := 0
 		nGoRoutines := 3
-		a := DefaultAsyncScheduler(3, 0).(*asyncScheduler)
+		mockWG := &mockWaitGroup{mockAdd: func(i int) {
+			calls += 1
+			if i != nGoRoutines {
+				t.Fatalf("Wrong delta added to the WaitGroup")
+			}
+		}}
+		oldNewWaitGroup := newWaitGroup
+		newWaitGroup = func() WaitGroup { return mockWG }
+
+		a := DefaultAsyncScheduler(uint64(nGoRoutines), 0).(*asyncScheduler)
 		if a.wg == nil {
 			t.Fatalf("Expected to be not nil")
 		}
-
-		panicked := false
-		doneCalls := 0
-		c := make(chan bool)
-		go func() {
-			defer func() {
-				e := recover()
-				if e == nil {
-					t.Fatalf("Expected to panic when the Done decrements the counter beolow zero")
-				}
-				panicked = true
-				c <- true
-			}()
-
-			// Add one to cause an exception
-			for i := 0; i < nGoRoutines+1; i++ {
-				a.wg.Done()
-				doneCalls += 1
-			}
-		}()
-		<-c
-		if !panicked {
-			t.Fatalf("Expected to panic when the Done decrements the counter beolow zero")
+		if calls != 1 {
+			t.Fatalf("Expected to call wg.Add() incrementing the counter")
 		}
-		if doneCalls != nGoRoutines {
-			t.Fatalf("Expected to decrement the counter %d times", nGoRoutines)
-		}
-
-		// Restore the WaitGroup to avoid another exception on Shutdown (plus one because of on-purpose overflow above)
-		a.wg.Add(nGoRoutines + 1)
 		a.Shutdown()
-	})
-	t.Run("Should spawn the correct number of go routines", func(t *testing.T) {
-		asyncHandleLogMutex.Lock()
-		defer asyncHandleLogMutex.Unlock()
-
+		newWaitGroup = oldNewWaitGroup
+	}, rNewWaitGroup))
+	t.Run("Should spawn the correct number of go routines", raceFreeTest(func(t *testing.T) {
 		// There's expected to exist 5 go routines, plus the TestSuite go routine,
 		// that will be chained together. The 0, 1, 2, and 3 will try to lock a mutex
 		// that can only be unlocked by the next go routine. Example:
@@ -138,12 +121,12 @@ func TestDefaultAsyncScheduler(t *testing.T) {
 
 		i := uint64(0)
 		oldAsyncHandleLog := AsyncHandleLog
-		AsyncHandleLog = func(ctx context.Context, c <-chan Log, wg *sync.WaitGroup) {
+		AsyncHandleLog = func(ctx context.Context, c <-chan Log, wg WaitGroup) {
 			idx := atomic.AddUint64(&i, 1)
 			if idx < 5 {
 				locks[idx].Lock()
 			}
-			locks[idx - 1].Unlock()
+			locks[idx-1].Unlock()
 		}
 
 		DefaultAsyncScheduler(5, 1)
@@ -152,15 +135,8 @@ func TestDefaultAsyncScheduler(t *testing.T) {
 			t.Fatalf("Expected to spawn only 5 go routines")
 		}
 		AsyncHandleLog = oldAsyncHandleLog
-	})
-	t.Run("Should give the correct context interface to the spawned go routines", func(t *testing.T) {
-		asyncHandleLogMutex.Lock()
-		contextWithCancelMutex.Lock()
-		defer func() {
-			contextWithCancelMutex.Unlock()
-			asyncHandleLogMutex.Unlock()
-		}()
-
+	}, rAsyncHandleLog))
+	t.Run("Should give the correct context interface to the spawned go routines", raceFreeTest(func(t *testing.T) {
 		realCtx, cancelFn := context.WithCancel(context.Background())
 		contextWithCancel = func(parent context.Context) (context.Context, context.CancelFunc) {
 			return realCtx, cancelFn
@@ -169,7 +145,7 @@ func TestDefaultAsyncScheduler(t *testing.T) {
 		wg := &sync.WaitGroup{}
 		wg.Add(int(nGoRoutines))
 		oldAsyncHandleLog := AsyncHandleLog
-		AsyncHandleLog = func(givenCtx context.Context, _ <-chan Log, _ *sync.WaitGroup) {
+		AsyncHandleLog = func(givenCtx context.Context, _ <-chan Log, _ WaitGroup) {
 			if givenCtx != realCtx {
 				t.Fatalf("Wrong context given")
 			}
@@ -179,18 +155,15 @@ func TestDefaultAsyncScheduler(t *testing.T) {
 		DefaultAsyncScheduler(nGoRoutines, 0)
 		wg.Wait()
 		AsyncHandleLog = oldAsyncHandleLog
-	})
-	t.Run("Should give the correct channel to each spawned go routine", func(t *testing.T) {
-		asyncHandleLogMutex.Lock()
-		defer asyncHandleLogMutex.Unlock()
-
+	}, rAsyncHandleLog, rContextWithCancel))
+	t.Run("Should give the correct unique channel to each spawned go routine", raceFreeTest(func(t *testing.T) {
 		nGoRoutines := uint64(5)
 		i := uint64(0)
 		wg := &sync.WaitGroup{}
 		wg.Add(int(nGoRoutines))
 		channels := make([]<-chan Log, nGoRoutines)
 		oldAsyncHandleLog := AsyncHandleLog
-		AsyncHandleLog = func(_ context.Context, c <-chan Log, _ *sync.WaitGroup) {
+		AsyncHandleLog = func(_ context.Context, c <-chan Log, _ WaitGroup) {
 			idx := atomic.AddUint64(&i, 1) - 1
 			channels[idx] = c
 			wg.Done()
@@ -206,17 +179,14 @@ func TestDefaultAsyncScheduler(t *testing.T) {
 			}
 		}
 		AsyncHandleLog = oldAsyncHandleLog
-	})
-	t.Run("Should give the correct waitGroup to the spawned go routines", func(t *testing.T) {
-		asyncHandleLogMutex.Lock()
-		defer asyncHandleLogMutex.Unlock()
-
+	}, rAsyncHandleLog))
+	t.Run("Should give the correct waitGroup to the spawned go routines", raceFreeTest(func(t *testing.T) {
 		nGoRoutines := uint64(5)
 		testSuiteWG := &sync.WaitGroup{}
-		var givenWG *sync.WaitGroup
+		var givenWG WaitGroup
 		testSuiteWG.Add(int(nGoRoutines))
 		oldAsyncHandleLog := AsyncHandleLog
-		AsyncHandleLog = func(_ context.Context, _ <-chan Log, receivedWG *sync.WaitGroup) {
+		AsyncHandleLog = func(_ context.Context, _ <-chan Log, receivedWG WaitGroup) {
 			if receivedWG == nil {
 				t.Fatalf("Not expected to pass nil WaitGroup to the spawned go routine")
 			}
@@ -231,7 +201,7 @@ func TestDefaultAsyncScheduler(t *testing.T) {
 		DefaultAsyncScheduler(nGoRoutines, 0)
 		testSuiteWG.Wait()
 		AsyncHandleLog = oldAsyncHandleLog
-	})
+	}, rAsyncHandleLog))
 }
 
 func TestShutdown(t *testing.T) {
@@ -247,21 +217,18 @@ func TestShutdown(t *testing.T) {
 		}
 	})
 	t.Run("Should call the wg.Wait() method", func(t *testing.T) {
-		wg := &sync.WaitGroup{}
-		wg.Add(1)
+		calls := 0
+		wg := &mockWaitGroup{mockWait: func() { calls += 1 }}
 		a := &asyncScheduler{wg: wg, cancelFn: func() {}}
-		time.AfterFunc(time.Millisecond * 100, func() { wg.Done() })
-		a.Shutdown() // deadlock in case of failure
+		a.Shutdown()
+		if calls != 1 {
+			t.Fatalf("Expected to call wg.Wait() one time")
+		}
 	})
 }
 
-var atomicAddUint64Mutex = &sync.Mutex{}
-
 func TestNextChannel(t *testing.T) {
-	t.Run("Should call the atomic.AddUint64 to increment the counter by one", func(t *testing.T) {
-		atomicAddUint64Mutex.Lock()
-		defer atomicAddUint64Mutex.Unlock()
-
+	t.Run("Should call the atomic.AddUint64 to increment the counter by one", raceFreeTest(func(t *testing.T) {
 		chans := []chan Log{make(chan Log), make(chan Log), make(chan Log)}
 		a := &asyncScheduler{chans: chans}
 		calls := 0
@@ -271,7 +238,7 @@ func TestNextChannel(t *testing.T) {
 				t.Fatalf("Expected to increment the counter by one")
 			}
 			if reflect.ValueOf(addr).Pointer() != reflect.ValueOf(&a.nextChan).Pointer() {
-				t.Fatalf("Wrong atomic.AddUint64 pointer")
+				t.Fatalf("Wrong pointer given to atomic.AddUint64")
 			}
 			return 1
 		}
@@ -280,14 +247,14 @@ func TestNextChannel(t *testing.T) {
 			t.Fatalf("Expected to call atomic.AddUint64")
 		}
 		atomicAddUint64 = atomic.AddUint64
-	})
-	t.Run("Should round-robin the channels for every call, starting from the first one", func(t *testing.T) {
+	}, rAtomicAddUint64))
+	t.Run("Should round-robin the channels every call, starting from the first one", func(t *testing.T) {
 		chans := []chan Log{make(chan Log), make(chan Log), make(chan Log)}
 		a := &asyncScheduler{chans: chans}
 		for _, chanI := range chans {
 			chanJ := a.NextChannel()
 			if reflect.ValueOf(chanI).Pointer() != reflect.ValueOf(chanJ).Pointer() {
-				t.Fatalf("Expected to return the right next channel")
+				t.Fatalf("Expected to return the correct next channel")
 			}
 		}
 		// Another round
@@ -301,7 +268,8 @@ func TestNextChannel(t *testing.T) {
 }
 
 func TestAsyncHandleLog(t *testing.T) {
-	// TODO: usar a tecnica de causar um panic ao decrementar o counter do waitGroup pra zero
+	// TODO: Passar um mock do WaitGroup e usar ele
+	// TODO: Retornar erros nos edge cases
 	t.Run("If the given WaitGroup is nil, return immediately", func(t *testing.T) {
 		c := make(chan bool)
 		go func() {
@@ -399,4 +367,58 @@ func TestAsyncHandleLog(t *testing.T) {
 			t.Fatalf("Deadlock!")
 		}
 	})
+}
+
+type mockWaitGroup struct {
+	mockWait func()
+	mockDone func()
+	mockAdd  func(i int)
+}
+
+func (f *mockWaitGroup) Wait() {
+	if f.mockWait != nil {
+		f.mockWait()
+	}
+}
+func (f *mockWaitGroup) Done() {
+	if f.mockDone != nil {
+		f.mockDone()
+	}
+}
+func (f *mockWaitGroup) Add(i int) {
+	if f.mockAdd != nil {
+		f.mockAdd(i)
+	}
+}
+
+// Tests run in parallel, so it's required to control the concurrency over
+// global variables (such as the mocked functions). The functions below handle
+// it
+
+type testResource struct {
+	index uint64 // unique ID
+	mutex *sync.Mutex
+}
+
+// generates a new mutex + unique ID
+var newResource = func() func() testResource {
+	i := uint64(0)
+	return func() testResource {
+		return testResource{
+			atomic.AddUint64(&i, 1) - 1,
+			&sync.Mutex{},
+		}
+	}
+}()
+
+// sort the resources in ID ascending order, and call "Lock". "Unlock" in the reverse order
+func raceFreeTest(fn func(*testing.T), resources ...testResource) func(*testing.T) {
+	return func(t *testing.T) {
+		sort.Slice(resources, func(i, j int) bool { return resources[i].index < resources[j].index })
+		for _, resource := range resources {
+			resource.mutex.Lock()
+			defer resource.mutex.Unlock() // Safe to call inside the loop
+		}
+		fn(t)
+	}
 }

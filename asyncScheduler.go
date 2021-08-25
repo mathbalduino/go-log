@@ -19,6 +19,14 @@ type AsyncScheduler interface {
 	Shutdown()
 }
 
+// WaitGroup is an interface used just to ease tests.
+// Always will be an *sync.WaitGroup
+type WaitGroup interface {
+	Wait()
+	Done()
+	Add(int)
+}
+
 // DefaultAsyncScheduler will create one channel by goroutine, with the given
 // capacity, and setup a goroutine that will handle newly created Logs.
 //
@@ -34,7 +42,7 @@ func DefaultAsyncScheduler(nGoRoutines uint64, chanCap uint64) AsyncScheduler {
 		make([]chan Log, nGoRoutines),
 		0,
 		cancelFn,
-		&sync.WaitGroup{},
+		newWaitGroup(),
 	}
 	scheduler.wg.Add(int(nGoRoutines))
 	for i := range scheduler.chans {
@@ -68,7 +76,7 @@ type asyncScheduler struct {
 	cancelFn context.CancelFunc
 
 	// Used to wait for the go routines exit
-	wg *sync.WaitGroup
+	wg WaitGroup
 }
 
 // Shutdown will call the cancel function, closing the go
@@ -98,7 +106,7 @@ var atomicAddUint64 = atomic.AddUint64
 // to access the internal "handleLog" function
 //
 // Using "var" just to ease tests
-var AsyncHandleLog = func(ctx context.Context, c <-chan Log, wg *sync.WaitGroup) {
+var AsyncHandleLog = func(ctx context.Context, c <-chan Log, wg WaitGroup) {
 	if wg == nil {
 		return
 	}
@@ -117,3 +125,6 @@ var AsyncHandleLog = func(ctx context.Context, c <-chan Log, wg *sync.WaitGroup)
 		}
 	}
 }
+
+// used just to ease tests
+var newWaitGroup = func() WaitGroup { return &sync.WaitGroup{} }
