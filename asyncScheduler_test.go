@@ -10,6 +10,7 @@ import (
 )
 
 var contextWithCancelMutex = &sync.Mutex{}
+var asyncHandleLogMutex = &sync.Mutex{}
 
 func TestDefaultAsyncScheduler(t *testing.T) {
 	t.Run("Should return nil if its given 0 go routines", func(t *testing.T) {
@@ -98,109 +99,138 @@ func TestDefaultAsyncScheduler(t *testing.T) {
 		a.Shutdown()
 	})
 	t.Run("Should spawn the correct number of go routines", func(t *testing.T) {
-		// TODO: Mock the AsyncHadleLog function and use a switch statement. Avoid using the channels
-		// There's expected to exist 5 go routines, that will be chained together. The 0, 1, 2, and 3 will
-		// try to lock a mutex that can only be unlocked by the next go routine. Example:
-		// 		GoRoutine 0:
+		asyncHandleLogMutex.Lock()
+		defer asyncHandleLogMutex.Unlock()
+
+		// There's expected to exist 5 go routines, plus the TestSuite go routine,
+		// that will be chained together. The 0, 1, 2, and 3 will try to lock a mutex
+		// that can only be unlocked by the next go routine. Example:
+		// 		TestSuite GoRoutine:
 		//			locks mutex 0
-		// 		GoRoutine 1:
+		// 		GoRoutine 0:
 		//			locks mutex 1
-		// 		GoRoutine 2:
+		// 		GoRoutine 1:
 		//			locks mutex 2
-		// 		GoRoutine 3:
+		// 		GoRoutine 2:
 		//			locks mutex 3
+		// 		GoRoutine 3:
+		//			locks mutex 4
 		// 		GoRoutine 4:
-		//			UNlocks mutex 3
+		//			UNlocks mutex 4
 		//			Last go routine alive and available (the others are locked)
 		// 		GoRoutine 3:
-		//			Unlocked by GoRoutine 4, UNlocks mutex 2
+		//			Unlocked by GoRoutine 4, UNlocks mutex 3
 		// 		GoRoutine 2:
-		//			Unlocked by GoRoutine 3, UNlocks mutex 1
+		//			Unlocked by GoRoutine 3, UNlocks mutex 2
 		// 		GoRoutine 1:
-		//			Unlocked by GoRoutine 2, UNlocks mutex 0
+		//			Unlocked by GoRoutine 2, UNlocks mutex 1
 		// 		GoRoutine 0:
-		//			Unlocked by GoRoutine 1, UNlocks TestSuite GoRoutine
+		//			Unlocked by GoRoutine 1, UNlocks mutex 0 (test suite)
 		// This way, it's required that there's at least 5 go routines, otherwise it will deadlock
 
-		a := DefaultAsyncScheduler(5, 1).(*asyncScheduler)
-		locks := []*sync.Mutex{{}, {}, {}, {}}
-
 		// Start the test with the mutexes locked
-		testSuiteLock := sync.Mutex{}
-		testSuiteLock.Lock()
+		locks := []*sync.Mutex{{}, {}, {}, {}, {}}
 		locks[0].Lock()
 		locks[1].Lock()
 		locks[2].Lock()
 		locks[3].Lock()
+		locks[4].Lock()
 
-		// Race conditions are not expected over "calls" variable (go routines are chained)
-		// Trouble using "for" statement. Hardcoded just to get it done
-		calls := 0
-		a.chans[0] <- Log{
-			logger: &Logger{
-				configuration: &Configuration{},
-				outputs: []Output{func(lvl_ uint64, msg_ string, fields_ LogFields) {
-					locks[0].Lock()
-					calls += 1
-					testSuiteLock.Unlock()
-				}},
-			},
-		}
-		a.chans[1] <- Log{
-			logger: &Logger{
-				configuration: &Configuration{},
-				outputs: []Output{func(lvl_ uint64, msg_ string, fields_ LogFields) {
-					locks[1].Lock()
-					calls += 1
-					locks[0].Unlock()
-				}},
-			},
-		}
-		a.chans[2] <- Log{
-			logger: &Logger{
-				configuration: &Configuration{},
-				outputs: []Output{func(lvl_ uint64, msg_ string, fields_ LogFields) {
-					locks[2].Lock()
-					calls += 1
-					locks[1].Unlock()
-				}},
-			},
-		}
-		a.chans[3] <- Log{
-			logger: &Logger{
-				configuration: &Configuration{},
-				outputs: []Output{func(lvl_ uint64, msg_ string, fields_ LogFields) {
-					locks[3].Lock()
-					calls += 1
-					locks[2].Unlock()
-				}},
-			},
-		}
-		a.chans[4] <- Log{
-			logger: &Logger{
-				configuration: &Configuration{},
-				outputs: []Output{func(lvl_ uint64, msg_ string, fields_ LogFields) {
-					calls += 1
-					locks[3].Unlock()
-				}},
-			},
+		i := uint64(0)
+		oldAsyncHandleLog := AsyncHandleLog
+		AsyncHandleLog = func(ctx context.Context, c <-chan Log, wg *sync.WaitGroup) {
+			idx := atomic.AddUint64(&i, 1)
+			if idx < 5 {
+				locks[idx].Lock()
+			}
+			locks[idx - 1].Unlock()
 		}
 
-		// Expected to be UNlocked by the first spawned go routine
-		testSuiteLock.Lock()
-		if calls != 5 {
-			t.Fatalf("Expected to spawn the given number of go routines")
+		DefaultAsyncScheduler(5, 1)
+		locks[0].Lock() // waits for the chain reaction
+		if i != 5 {
+			t.Fatalf("Expected to spawn only 5 go routines")
 		}
-		a.Shutdown()
+		AsyncHandleLog = oldAsyncHandleLog
 	})
 	t.Run("Should give the correct context interface to the spawned go routines", func(t *testing.T) {
-		t.Fatalf("implement-me")
+		asyncHandleLogMutex.Lock()
+		contextWithCancelMutex.Lock()
+		defer func() {
+			contextWithCancelMutex.Unlock()
+			asyncHandleLogMutex.Unlock()
+		}()
+
+		realCtx, cancelFn := context.WithCancel(context.Background())
+		contextWithCancel = func(parent context.Context) (context.Context, context.CancelFunc) {
+			return realCtx, cancelFn
+		}
+		nGoRoutines := uint64(5)
+		wg := &sync.WaitGroup{}
+		wg.Add(int(nGoRoutines))
+		oldAsyncHandleLog := AsyncHandleLog
+		AsyncHandleLog = func(givenCtx context.Context, _ <-chan Log, _ *sync.WaitGroup) {
+			if givenCtx != realCtx {
+				t.Fatalf("Wrong context given")
+			}
+			wg.Done()
+		}
+
+		DefaultAsyncScheduler(nGoRoutines, 0)
+		wg.Wait()
+		AsyncHandleLog = oldAsyncHandleLog
 	})
 	t.Run("Should give the correct channel to each spawned go routine", func(t *testing.T) {
-		t.Fatalf("implement-me")
+		asyncHandleLogMutex.Lock()
+		defer asyncHandleLogMutex.Unlock()
+
+		nGoRoutines := uint64(5)
+		i := uint64(0)
+		wg := &sync.WaitGroup{}
+		wg.Add(int(nGoRoutines))
+		channels := make([]<-chan Log, nGoRoutines)
+		oldAsyncHandleLog := AsyncHandleLog
+		AsyncHandleLog = func(_ context.Context, c <-chan Log, _ *sync.WaitGroup) {
+			idx := atomic.AddUint64(&i, 1) - 1
+			channels[idx] = c
+			wg.Done()
+		}
+
+		DefaultAsyncScheduler(nGoRoutines, 0)
+		wg.Wait()
+		for i, chanI := range channels {
+			for j := i + 1; j < len(channels); j++ {
+				if reflect.ValueOf(chanI).Pointer() == reflect.ValueOf(channels[j]).Pointer() {
+					t.Fatalf("Every go routine is expected to have a unique channel")
+				}
+			}
+		}
+		AsyncHandleLog = oldAsyncHandleLog
 	})
 	t.Run("Should give the correct waitGroup to the spawned go routines", func(t *testing.T) {
-		t.Fatalf("implement-me")
+		asyncHandleLogMutex.Lock()
+		defer asyncHandleLogMutex.Unlock()
+
+		nGoRoutines := uint64(5)
+		testSuiteWG := &sync.WaitGroup{}
+		var givenWG *sync.WaitGroup
+		testSuiteWG.Add(int(nGoRoutines))
+		oldAsyncHandleLog := AsyncHandleLog
+		AsyncHandleLog = func(_ context.Context, _ <-chan Log, receivedWG *sync.WaitGroup) {
+			if receivedWG == nil {
+				t.Fatalf("Not expected to pass nil WaitGroup to the spawned go routine")
+			}
+			if givenWG == nil {
+				givenWG = receivedWG
+			} else if reflect.ValueOf(givenWG).Pointer() != reflect.ValueOf(receivedWG).Pointer() {
+				t.Fatalf("Expected to pass the same WaitGroup to all the spawned go routines")
+			}
+			testSuiteWG.Done()
+		}
+
+		DefaultAsyncScheduler(nGoRoutines, 0)
+		testSuiteWG.Wait()
+		AsyncHandleLog = oldAsyncHandleLog
 	})
 }
 
@@ -217,28 +247,11 @@ func TestShutdown(t *testing.T) {
 		}
 	})
 	t.Run("Should call the wg.Wait() method", func(t *testing.T) {
-		// TODO: Melhorar esse teste. Ta ruim, as vezes pode falhar mesmo estando correto por causa dos timers
 		wg := &sync.WaitGroup{}
 		wg.Add(1)
 		a := &asyncScheduler{wg: wg, cancelFn: func() {}}
-		time.AfterFunc(time.Second, func() { wg.Done() })
-		c := make(chan bool)
-		go func() {
-			a.Shutdown()
-			c <- true
-		}()
-		waited := false
-		for {
-			select {
-			case <-c:
-				if !waited {
-					t.Fatalf("Expected to wait at wg.Wait()")
-				}
-				return
-			case <-time.After(time.Millisecond * 500):
-				waited = true
-			}
-		}
+		time.AfterFunc(time.Millisecond * 100, func() { wg.Done() })
+		a.Shutdown() // deadlock in case of failure
 	})
 }
 
