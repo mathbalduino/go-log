@@ -51,7 +51,9 @@ func (l Log) Field(key string) interface{} {
 // Note that there are two reserved fields (lvl and msg),
 // that will override any existing fields with the same
 // configured keys
-func handleLog(log Log) {
+//
+// Using var just to ease tests
+var handleLog = func(log Log) {
 	log.fields = cloneOrNew(log.logger.fields)
 	mergeOverriding(log.fields, log.syncFields)
 	mergeOverriding(log.fields, log.adHocFields...)

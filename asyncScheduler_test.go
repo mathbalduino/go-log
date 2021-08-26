@@ -2,19 +2,12 @@ package loxeLog
 
 import (
 	"context"
+	"fmt"
 	"reflect"
-	"sort"
 	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
-)
-
-var (
-	rContextWithCancel = newResource()
-	rAsyncHandleLog    = newResource()
-	rNewWaitGroup      = newResource()
-	rAtomicAddUint64   = newResource()
 )
 
 func TestDefaultAsyncScheduler(t *testing.T) {
@@ -52,15 +45,14 @@ func TestDefaultAsyncScheduler(t *testing.T) {
 	})
 	t.Run("Should set the cancelFn to the one returned by the contextWithCancel", raceFreeTest(func(t *testing.T) {
 		ctx, cancelFn := context.WithCancel(context.Background())
-		contextWithCancel = func(parent context.Context) (context.Context, context.CancelFunc) {
-			return ctx, cancelFn
-		}
+		contextWithCancel = func(parent context.Context) (context.Context, context.CancelFunc) { return ctx, cancelFn }
+		defer func() { contextWithCancel = context.WithCancel }()
+
 		a := DefaultAsyncScheduler(1, 0).(*asyncScheduler)
 		if reflect.ValueOf(cancelFn).Pointer() != reflect.ValueOf(a.cancelFn).Pointer() {
 			t.Fatalf("Expected to be the same cancelFn")
 		}
 		a.Shutdown()
-		contextWithCancel = context.WithCancel
 	}, rContextWithCancel))
 	t.Run("Should set a not nil waitGroup and increment it's counter by the number of goRoutines", raceFreeTest(func(t *testing.T) {
 		calls := 0
@@ -72,6 +64,7 @@ func TestDefaultAsyncScheduler(t *testing.T) {
 			}
 		}}
 		oldNewWaitGroup := newWaitGroup
+		defer func() { newWaitGroup = oldNewWaitGroup }()
 		newWaitGroup = func() WaitGroup { return mockWG }
 
 		a := DefaultAsyncScheduler(uint64(nGoRoutines), 0).(*asyncScheduler)
@@ -82,7 +75,6 @@ func TestDefaultAsyncScheduler(t *testing.T) {
 			t.Fatalf("Expected to call wg.Add() incrementing the counter")
 		}
 		a.Shutdown()
-		newWaitGroup = oldNewWaitGroup
 	}, rNewWaitGroup))
 	t.Run("Should spawn the correct number of go routines", raceFreeTest(func(t *testing.T) {
 		// There's expected to exist 5 go routines, plus the TestSuite go routine,
@@ -120,13 +112,16 @@ func TestDefaultAsyncScheduler(t *testing.T) {
 		locks[4].Lock()
 
 		i := uint64(0)
-		oldAsyncHandleLog := AsyncHandleLog
-		AsyncHandleLog = func(ctx context.Context, c <-chan Log, wg WaitGroup) {
+		oldAsyncHandleLog := asyncHandleLog
+		defer func() { asyncHandleLog = oldAsyncHandleLog }()
+		asyncHandleLog = func(ctx context.Context, c <-chan Log, wg WaitGroup) error {
 			idx := atomic.AddUint64(&i, 1)
+			fmt.Println(idx)
 			if idx < 5 {
 				locks[idx].Lock()
 			}
 			locks[idx-1].Unlock()
+			return nil
 		}
 
 		DefaultAsyncScheduler(5, 1)
@@ -134,27 +129,27 @@ func TestDefaultAsyncScheduler(t *testing.T) {
 		if i != 5 {
 			t.Fatalf("Expected to spawn only 5 go routines")
 		}
-		AsyncHandleLog = oldAsyncHandleLog
 	}, rAsyncHandleLog))
 	t.Run("Should give the correct context interface to the spawned go routines", raceFreeTest(func(t *testing.T) {
 		realCtx, cancelFn := context.WithCancel(context.Background())
-		contextWithCancel = func(parent context.Context) (context.Context, context.CancelFunc) {
-			return realCtx, cancelFn
-		}
+		contextWithCancel = func(parent context.Context) (context.Context, context.CancelFunc) { return realCtx, cancelFn }
+		defer func() { contextWithCancel = context.WithCancel }()
+
 		nGoRoutines := uint64(5)
-		wg := &sync.WaitGroup{}
+		wg := &sync.WaitGroup{} // just to make the testSuite wait for the go routines
 		wg.Add(int(nGoRoutines))
-		oldAsyncHandleLog := AsyncHandleLog
-		AsyncHandleLog = func(givenCtx context.Context, _ <-chan Log, _ WaitGroup) {
+		oldAsyncHandleLog := asyncHandleLog
+		defer func() { asyncHandleLog = oldAsyncHandleLog }()
+		asyncHandleLog = func(givenCtx context.Context, _ <-chan Log, _ WaitGroup) error {
 			if givenCtx != realCtx {
 				t.Fatalf("Wrong context given")
 			}
 			wg.Done()
+			return nil
 		}
 
 		DefaultAsyncScheduler(nGoRoutines, 0)
 		wg.Wait()
-		AsyncHandleLog = oldAsyncHandleLog
 	}, rAsyncHandleLog, rContextWithCancel))
 	t.Run("Should give the correct unique channel to each spawned go routine", raceFreeTest(func(t *testing.T) {
 		nGoRoutines := uint64(5)
@@ -162,11 +157,13 @@ func TestDefaultAsyncScheduler(t *testing.T) {
 		wg := &sync.WaitGroup{}
 		wg.Add(int(nGoRoutines))
 		channels := make([]<-chan Log, nGoRoutines)
-		oldAsyncHandleLog := AsyncHandleLog
-		AsyncHandleLog = func(_ context.Context, c <-chan Log, _ WaitGroup) {
+		oldAsyncHandleLog := asyncHandleLog
+		defer func() { asyncHandleLog = oldAsyncHandleLog }()
+		asyncHandleLog = func(_ context.Context, c <-chan Log, _ WaitGroup) error {
 			idx := atomic.AddUint64(&i, 1) - 1
 			channels[idx] = c
 			wg.Done()
+			return nil
 		}
 
 		DefaultAsyncScheduler(nGoRoutines, 0)
@@ -178,15 +175,15 @@ func TestDefaultAsyncScheduler(t *testing.T) {
 				}
 			}
 		}
-		AsyncHandleLog = oldAsyncHandleLog
 	}, rAsyncHandleLog))
 	t.Run("Should give the correct waitGroup to the spawned go routines", raceFreeTest(func(t *testing.T) {
 		nGoRoutines := uint64(5)
 		testSuiteWG := &sync.WaitGroup{}
 		var givenWG WaitGroup
 		testSuiteWG.Add(int(nGoRoutines))
-		oldAsyncHandleLog := AsyncHandleLog
-		AsyncHandleLog = func(_ context.Context, _ <-chan Log, receivedWG WaitGroup) {
+		oldAsyncHandleLog := asyncHandleLog
+		defer func() { asyncHandleLog = oldAsyncHandleLog }()
+		asyncHandleLog = func(_ context.Context, _ <-chan Log, receivedWG WaitGroup) error {
 			if receivedWG == nil {
 				t.Fatalf("Not expected to pass nil WaitGroup to the spawned go routine")
 			}
@@ -196,11 +193,11 @@ func TestDefaultAsyncScheduler(t *testing.T) {
 				t.Fatalf("Expected to pass the same WaitGroup to all the spawned go routines")
 			}
 			testSuiteWG.Done()
+			return nil
 		}
 
 		DefaultAsyncScheduler(nGoRoutines, 0)
 		testSuiteWG.Wait()
-		AsyncHandleLog = oldAsyncHandleLog
 	}, rAsyncHandleLog))
 }
 
@@ -242,11 +239,12 @@ func TestNextChannel(t *testing.T) {
 			}
 			return 1
 		}
+		defer func() { atomicAddUint64 = atomic.AddUint64 }()
+
 		a.NextChannel()
 		if calls != 1 {
 			t.Fatalf("Expected to call atomic.AddUint64")
 		}
-		atomicAddUint64 = atomic.AddUint64
 	}, rAtomicAddUint64))
 	t.Run("Should round-robin the channels every call, starting from the first one", func(t *testing.T) {
 		chans := []chan Log{make(chan Log), make(chan Log), make(chan Log)}
@@ -268,103 +266,75 @@ func TestNextChannel(t *testing.T) {
 }
 
 func TestAsyncHandleLog(t *testing.T) {
-	// TODO: Passar um mock do WaitGroup e usar ele
-	// TODO: Retornar erros nos edge cases
 	t.Run("If the given WaitGroup is nil, return immediately", func(t *testing.T) {
-		c := make(chan bool)
-		go func() {
-			AsyncHandleLog(context.Background(), make(<-chan Log), nil)
-			c <- true
-		}()
-		select {
-		case <-c:
-			return
-		case <-time.After(time.Second):
-			t.Fatalf("Expected to not enter the loop")
+		e := AsyncHandleLog(context.Background(), make(<-chan Log), nil)
+		if e != ErrNilWaitGroup {
+			t.Fatalf("Expected to return the correct error")
 		}
 	})
 	t.Run("If the given context is nil, call wg.Done() and return immediately", func(t *testing.T) {
-		c := make(chan bool)
-		wg := &sync.WaitGroup{}
-		wg.Add(1)
-		go func() {
-			AsyncHandleLog(nil, make(<-chan Log), wg)
-			c <- true
-		}()
-		select {
-		case <-c:
-			wg.Wait() // not expected to deadlock
-			return
-		case <-time.After(time.Second):
-			t.Fatalf("Expected to not enter the loop")
-		}
-	})
-	t.Run("If the given chan is nil, call wg.Done() and return immediately", func(t *testing.T) {
-		c := make(chan bool)
-		wg := &sync.WaitGroup{}
-		wg.Add(1)
-		go func() {
-			AsyncHandleLog(context.Background(), nil, wg)
-			c <- true
-		}()
-		select {
-		case <-c:
-			wg.Wait() // not expected to deadlock
-			return
-		case <-time.After(time.Second):
-			t.Fatalf("Expected to not enter the loop")
-		}
-	})
-	t.Run("Should forward the logs received via channel to the 'handleLog' function", func(t *testing.T) {
-		// TODO: mock handleLog function
-		logChan := make(chan Log)
-		ctx, cancelFn := context.WithCancel(context.Background())
-		wg := &sync.WaitGroup{}
-		wg.Add(1)
-		go AsyncHandleLog(ctx, logChan, wg)
-
-		lvl := LvlDebug
-		msg := "Some msg"
-		fields := LogFields{"a": "aaa", "b": "bbb", "d": "ddd"}
 		calls := 0
-		log := Log{
-			lvl: lvl,
-			msg: msg,
-			logger: &Logger{
-				configuration: &Configuration{},
-				outputs: []Output{func(lvl_ uint64, msg_ string, fields_ LogFields) {
-					calls += 1
-					if lvl_ != lvl || msg_ != msg || !reflect.DeepEqual(fields_, fields_) {
-						t.Fatalf("Expected to pass the correct Log to the outputs")
-					}
-				}},
-				fields: fields,
-			},
+		wg := &mockWaitGroup{mockDone: func() {
+			calls += 1
+		}}
+		e := AsyncHandleLog(nil, make(<-chan Log), wg)
+		if e != ErrNilCtx {
+			t.Fatalf("Expected to return the correct error")
 		}
-		logChan <- log
-
 		if calls != 1 {
-			t.Fatalf("Expected to give the Log to the outputs")
+			t.Fatalf("Expected to call wg.Done() before exiting")
 		}
-		cancelFn()
 	})
-	t.Run("Should return when the context is done, decrementing the semaphore", func(t *testing.T) {
-		c := make(chan bool)
-		ctx, cancelFn := context.WithCancel(context.Background())
-		wg := &sync.WaitGroup{}
-		wg.Add(1)
-		go func() {
-			AsyncHandleLog(ctx, make(chan Log), wg)
-			c <- true
-		}()
+	t.Run("If the given channel is nil, call wg.Done() and return immediately", func(t *testing.T) {
+		calls := 0
+		wg := &mockWaitGroup{mockDone: func() {
+			calls += 1
+		}}
+		e := AsyncHandleLog(context.Background(), nil, wg)
+		if e != ErrNilChan {
+			t.Fatalf("Expected to return the correct error")
+		}
+		if calls != 1 {
+			t.Fatalf("Expected to call wg.Done() before exiting")
+		}
+	})
+	t.Run("Should forward the logs received via channel to the 'handleLog' function", raceFreeTest(func(t *testing.T) {
+		expectedLog := Log{
+			lvl:         LvlDebug,
+			msg:         "Some msg",
+			logger:      &Logger{},
+			syncFields:  LogFields{"a": "aaa", "b": "bbb", "c": "ccc"},
+			adHocFields: []LogFields{{"d": "ddd", "e": "eee", "f": "fff"}},
+			fields:      LogFields{"g": "ggg", "h": "hhh", "i": "iii"},
+		}
+		calls := 0
+		oldHandleLog := handleLog
+		defer func() { handleLog = oldHandleLog }()
+		handleLog = func(receivedLog Log) {
+			calls += 1
+			if !reflect.DeepEqual(receivedLog, expectedLog) {
+				t.Fatalf("Expected to receive a different log")
+			}
+		}
 
-		cancelFn()
-		select {
-		case <-c:
-			wg.Wait() // not expected to deadlock
-			return
-		case <-time.After(time.Second * 10): // safe-exit for deadlocks
-			t.Fatalf("Deadlock!")
+		c := make(chan Log)
+		go AsyncHandleLog(context.Background(), c, &mockWaitGroup{})
+		c <- expectedLog
+		if calls != 1 {
+			t.Fatalf("Expected to call handleLog")
+		}
+	}, rHandleLog))
+	t.Run("Should return when the context is done, decrementing the counter and returning nil", func(t *testing.T) {
+		ctx, cancelFn := context.WithCancel(context.Background())
+		calls := 0
+		wg := &mockWaitGroup{mockDone: func() { calls += 1 }}
+		time.AfterFunc(time.Millisecond*500, cancelFn)
+		e := AsyncHandleLog(ctx, make(chan Log), wg)
+		if e != nil {
+			t.Fatalf("Error is expected to be nil")
+		}
+		if calls != 1 {
+			t.Fatalf("Expected to decrement the waitGroup counter")
 		}
 	})
 }
@@ -388,37 +358,5 @@ func (f *mockWaitGroup) Done() {
 func (f *mockWaitGroup) Add(i int) {
 	if f.mockAdd != nil {
 		f.mockAdd(i)
-	}
-}
-
-// Tests run in parallel, so it's required to control the concurrency over
-// global variables (such as the mocked functions). The functions below handle
-// it
-
-type testResource struct {
-	index uint64 // unique ID
-	mutex *sync.Mutex
-}
-
-// generates a new mutex + unique ID
-var newResource = func() func() testResource {
-	i := uint64(0)
-	return func() testResource {
-		return testResource{
-			atomic.AddUint64(&i, 1) - 1,
-			&sync.Mutex{},
-		}
-	}
-}()
-
-// sort the resources in ID ascending order, and call "Lock". "Unlock" in the reverse order
-func raceFreeTest(fn func(*testing.T), resources ...testResource) func(*testing.T) {
-	return func(t *testing.T) {
-		sort.Slice(resources, func(i, j int) bool { return resources[i].index < resources[j].index })
-		for _, resource := range resources {
-			resource.mutex.Lock()
-			defer resource.mutex.Unlock() // Safe to call inside the loop
-		}
-		fn(t)
 	}
 }
