@@ -97,7 +97,6 @@ func (l *Logger) Log(lvl uint64, msg string, adHocFields []LogFields) {
 		l,
 		nil,
 		adHocFields,
-		nil,
 	}
 	if len(l.syncHooks) > 0 {
 		log.syncFields = LogFields{}

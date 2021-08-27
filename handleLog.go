@@ -12,21 +12,16 @@ type Log struct {
 	logger      *Logger
 	syncFields  LogFields
 	adHocFields []LogFields
-	fields      LogFields
 }
 
 // Field will return the value associated with the
 // given key
 //
 // Note that if this method is called in sync hooks,
-// the async fields aren't ready yet. Pay attention
+// the async fields aren't ready yet, so the returned
+// value may be overridden by them. Pay attention
 func (l Log) Field(key string) interface{} {
-	v := tryRead(key, l.fields)
-	if v != nil {
-		return v
-	}
-
-	v = tryRead(key, l.adHocFields...)
+	v := tryRead(key, l.adHocFields...)
 	if v != nil {
 		return v
 	}
@@ -45,8 +40,8 @@ func (l Log) Field(key string) interface{} {
 // the registered output functions.
 //
 // The logger fields will be overridden by sync fields,
-// that will be overridden by adhoc fields and latter by
-// async fields
+// that will be overridden by async fields and latter by
+// adHoc fields
 //
 // Note that there are two reserved fields (lvl and msg),
 // that will override any existing fields with the same
@@ -54,15 +49,15 @@ func (l Log) Field(key string) interface{} {
 //
 // Using var just to ease tests
 var handleLog = func(log Log) {
-	log.fields = cloneOrNew(log.logger.fields)
-	mergeOverriding(log.fields, log.syncFields)
-	mergeOverriding(log.fields, log.adHocFields...)
-	applyHooks(log, log.fields, log.logger.asyncHooks)
-	log.fields[log.logger.configuration.LvlFieldName] = log.lvl
-	log.fields[log.logger.configuration.MsgFieldName] = log.msg
+	logFields := cloneOrNew(log.logger.fields)
+	mergeOverriding(logFields, log.syncFields)
+	applyHooks(log, logFields, log.logger.asyncHooks)
+	mergeOverriding(logFields, log.adHocFields...)
+	logFields[log.logger.configuration.LvlFieldName] = log.lvl
+	logFields[log.logger.configuration.MsgFieldName] = log.msg
 
 	for _, output := range log.logger.outputs {
-		output(log.lvl, log.msg, log.fields)
+		output(log.lvl, log.msg, logFields)
 	}
 	if log.lvl == LvlFatal {
 		panic(log.msg)
