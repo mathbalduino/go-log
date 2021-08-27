@@ -38,7 +38,9 @@ func TestFields(t *testing.T) {
 		if reflect.ValueOf(l.fields).Pointer() == reflect.ValueOf(newLog.fields).Pointer() {
 			t.Fatalf("Expected to be a different fields map")
 		}
-		// Fields values check done with another test case
+		if !reflect.DeepEqual(l.fields, newLog.fields) {
+			t.Fatalf("Expected an equivalent fields map")
+		}
 		if reflect.ValueOf(l.syncHooks).Pointer() == reflect.ValueOf(newLog.syncHooks).Pointer() {
 			t.Fatalf("Expected to be a different syncHooks map")
 		}
@@ -69,7 +71,7 @@ func TestFields(t *testing.T) {
 		}
 		for k, v := range l.outputs {
 			if reflect.ValueOf(v).Pointer() != reflect.ValueOf(newLog.outputs[k]).Pointer() {
-				t.Fatalf("Expected an equivalent asyncHooks slice")
+				t.Fatalf("Expected an equivalent outputs slice")
 			}
 		}
 	})
@@ -143,7 +145,7 @@ func TestRawFields(t *testing.T) {
 		}
 		for k, v := range l.outputs {
 			if reflect.ValueOf(v).Pointer() != reflect.ValueOf(newLog.outputs[k]).Pointer() {
-				t.Fatalf("Expected an equivalent asyncHooks slice")
+				t.Fatalf("Expected an equivalent outputs slice")
 			}
 		}
 	})
@@ -151,8 +153,8 @@ func TestRawFields(t *testing.T) {
 		fields := LogFields{"a": "AAA", "d": "ddd", "e": "eee"}
 		l := &Logger{fields: LogFields{"a": "aaa", "b": "bbb", "c": "ccc"}}
 		newLog := l.RawFields(fields)
-		if newLog.fields["a"] != "AAA" || newLog.fields["d"] != "ddd" || newLog.fields["e"] != "eee" {
-			t.Fatalf("Expected the merge of the logger fields + argument")
+		if len(newLog.fields) != 3 || newLog.fields["a"] != "AAA" || newLog.fields["d"] != "ddd" || newLog.fields["e"] != "eee" {
+			t.Fatalf("Expected to override the value of the logger fields completelly")
 		}
 	})
 }
