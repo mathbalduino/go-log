@@ -2,6 +2,7 @@ package loxeLog
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 )
 
@@ -30,30 +31,42 @@ func TestDefaultConfig(t *testing.T) {
 			t.Fatalf("Expected a configuration with only the default log levels enabled")
 		}
 	})
-	t.Run("Should set an error parser that returns the error message and nil fields", func(t *testing.T) {
+	t.Run("Should set the DefaultErrorParser as the default one", func(t *testing.T) {
 		c := DefaultConfig()
-		if c.ErrorParser == nil {
-			t.Fatalf("Expected a configuration with a non-nil error parser")
+		if reflect.ValueOf(c.ErrorParser).Pointer() != reflect.ValueOf(DefaultErrorParser).Pointer() {
+			t.Fatalf("Expected the correct ErrorParser")
 		}
-		errMsg := "some error message"
-		str, fields := c.ErrorParser(fmt.Errorf(errMsg))
-		if str != errMsg {
+	})
+}
+
+func TestDefaultErrorParser(t *testing.T) {
+	t.Run("Should return the error string and the correct map", func(t *testing.T) {
+		err := fmt.Errorf("some error msg")
+		str, fields := DefaultErrorParser(err)
+		if str != err.Error() {
 			t.Fatalf("Expected a configuration with an error parser that returns the error msg")
 		}
-		if fields != nil {
-			t.Fatalf("Expected a configuration with an error parser that always returns nil fields")
+		if !reflect.DeepEqual(fields, LogFields{DefaultErrorParserKey: err}) {
+			t.Fatalf("Expected a configuration with an error parser that returns the correct map")
 		}
 	})
 }
 
 func TestValidateConfig(t *testing.T) {
 	t.Run("Should return the right error when the given configuration has the same LvlFieldName and MsgFieldName", func(t *testing.T) {
-		if validateConfig(Configuration{MsgFieldName: "a", LvlFieldName: "a"}) != ErrLvlMsgSameKey {
+		fn := func(err error) (string, LogFields) { return "", nil }
+		if validateConfig(Configuration{MsgFieldName: "a", LvlFieldName: "a", ErrorParser: fn}) != ErrLvlMsgSameKey {
 			t.Fatalf("Expected a different error token")
 		}
 	})
-	t.Run("Should return nil error if the LvlFieldName and MsgFieldName are different", func(t *testing.T) {
-		if validateConfig(Configuration{MsgFieldName: "a", LvlFieldName: "b"}) != nil {
+	t.Run("Should return the right error when the given configuration has a nil ErrorParser", func(t *testing.T) {
+		if validateConfig(Configuration{MsgFieldName: "a", LvlFieldName: "b"}) != ErrNilErrorParser {
+			t.Fatalf("Expected a different error token")
+		}
+	})
+	t.Run("Should return nil error if LvlFieldName != MsgFieldName, there's an ErrorParser and XXX", func(t *testing.T) {
+		fn := func(err error) (string, LogFields) { return "", nil }
+		if validateConfig(Configuration{MsgFieldName: "a", LvlFieldName: "b", ErrorParser: fn}) != nil {
 			t.Fatalf("Expected a nil error")
 		}
 	})

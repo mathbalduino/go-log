@@ -44,15 +44,28 @@ func DefaultConfig() Configuration {
 		"lvl",
 		"msg",
 		LvlDefaults,
-		func(err error) (string, LogFields) { return err.Error(), nil },
+		DefaultErrorParser,
 	}
 }
+
+// DefaultErrorParser will return a tuple containing the error string
+// and the following map: { "error": err }
+func DefaultErrorParser(err error) (string, LogFields) {
+	return err.Error(), LogFields{DefaultErrorParserKey: err}
+}
+
+// DefaultErrorParserKey is the value of the key used
+// to store the errors returned by the DefaultErrorParser
+const DefaultErrorParserKey = "error"
 
 // validateConfig will return a non-nil error
 // if the given Configuration contains errors
 func validateConfig(c Configuration) error {
 	if c.LvlFieldName == c.MsgFieldName {
 		return ErrLvlMsgSameKey
+	}
+	if c.ErrorParser == nil {
+		return ErrNilErrorParser
 	}
 	return nil
 }
