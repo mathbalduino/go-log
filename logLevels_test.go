@@ -48,7 +48,7 @@ func TestLog(t *testing.T) {
 		}}
 		l := &Logger{
 			configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: lvl},
-			syncHooks:     Hooks{"i": fnI, "j": fnJ, "k": fnK},
+			preHooks:      Hooks{"i": fnI, "j": fnJ, "k": fnK},
 		}
 
 		l.Log(lvl, msg, adHocFields)
@@ -68,11 +68,14 @@ func TestLog(t *testing.T) {
 		if reflect.ValueOf(receivedLog.logger).Pointer() != reflect.ValueOf(l).Pointer() {
 			t.Fatalf("Expected to create a log that points to the correct logger")
 		}
-		if !reflect.DeepEqual(receivedLog.syncFields, LogFields{"i": "iii", "j": "jjj", "k": "kkk"}) {
-			t.Fatalf("Expected to create a log with the correct sync fields")
+		if !reflect.DeepEqual(receivedLog.preFields, LogFields{"i": "iii", "j": "jjj", "k": "kkk"}) {
+			t.Fatalf("Expected to create a log with the correct pre fields")
 		}
 		if !reflect.DeepEqual(receivedLog.adHocFields, adHocFields) {
 			t.Fatalf("Expected to create a log with the correct adHoc fields")
+		}
+		if receivedLog.postFields != nil {
+			t.Fatalf("Expected postFields to be nil")
 		}
 	}, wHandleLog))
 	t.Run("Should give the correct log to handleLog directly, if it's sync (nil AsyncScheduler)", func(t *testing.T) {
@@ -88,7 +91,7 @@ func TestLog(t *testing.T) {
 		fnK := func(log Log) interface{} { return "kkk" }
 		l := &Logger{
 			configuration: &Configuration{LvlsEnabled: lvl},
-			syncHooks:     Hooks{"i": fnI, "j": fnJ, "k": fnK},
+			preHooks:      Hooks{"i": fnI, "j": fnJ, "k": fnK},
 		}
 		calls := 0
 		handleLog = func(receivedLog Log) {
@@ -102,11 +105,14 @@ func TestLog(t *testing.T) {
 			if reflect.ValueOf(receivedLog.logger).Pointer() != reflect.ValueOf(l).Pointer() {
 				t.Fatalf("Expected to create a log that points to the correct logger")
 			}
-			if !reflect.DeepEqual(receivedLog.syncFields, LogFields{"i": "iii", "j": "jjj", "k": "kkk"}) {
-				t.Fatalf("Expected to create a log with the correct sync fields")
+			if !reflect.DeepEqual(receivedLog.preFields, LogFields{"i": "iii", "j": "jjj", "k": "kkk"}) {
+				t.Fatalf("Expected to create a log with the correct pre fields")
 			}
 			if !reflect.DeepEqual(receivedLog.adHocFields, adHocFields) {
 				t.Fatalf("Expected to create a log with the correct adHoc fields")
+			}
+			if receivedLog.postFields != nil {
+				t.Fatalf("Expected postFields to be nil")
 			}
 		}
 

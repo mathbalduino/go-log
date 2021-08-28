@@ -97,10 +97,11 @@ func (l *Logger) Log(lvl uint64, msg string, adHocFields []LogFields) {
 		l,
 		nil,
 		adHocFields,
+		nil,
 	}
-	if len(l.syncHooks) > 0 {
-		log.syncFields = LogFields{}
-		applyHooks(log, log.syncFields, l.syncHooks)
+	if len(l.preHooks) > 0 {
+		log.preFields = LogFields{}
+		applyHooks(log, log.preFields, l.preHooks)
 	}
 
 	if l.configuration.AsyncScheduler != nil {

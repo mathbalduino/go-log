@@ -5,38 +5,38 @@ package loxeLog
 // call)
 type Hooks = map[string]func(Log) interface{}
 
-// SyncHooks will append the given Hooks to the Logger
-// sync Hooks, overriding any already existing hooks
+// PreHooks will append the given Hooks to the Logger
+// pre Hooks, overriding any already existing hooks
 // and returning a new Logger instance
-func (l *Logger) SyncHooks(hooks Hooks) *Logger {
+func (l *Logger) PreHooks(hooks Hooks) *Logger {
 	newLogger := cloneLogger(l)
-	mergeOverriding_(newLogger.syncHooks, hooks)
+	mergeOverriding_(newLogger.preHooks, hooks)
 	return newLogger
 }
 
-// RawSyncHooks will set the given Hooks to the Logger
-// sync Hooks, discarding the previous value and returning
+// RawPreHooks will set the given Hooks to the Logger
+// pre Hooks, discarding the previous value and returning
 // a new Logger instance
-func (l *Logger) RawSyncHooks(hooks Hooks) *Logger {
+func (l *Logger) RawPreHooks(hooks Hooks) *Logger {
 	newLogger := cloneLogger(l)
-	newLogger.syncHooks = hooks
+	newLogger.preHooks = hooks
 	return newLogger
 }
 
-// AsyncHooks will append the given Hooks to the Logger
-// async Hooks, overriding any already existing hooks
+// PostHooks will append the given Hooks to the Logger
+// post Hooks, overriding any already existing hooks
 // and returning a new Logger instance
-func (l *Logger) AsyncHooks(hooks Hooks) *Logger {
+func (l *Logger) PostHooks(hooks Hooks) *Logger {
 	newLogger := cloneLogger(l)
-	mergeOverriding_(newLogger.asyncHooks, hooks)
+	mergeOverriding_(newLogger.postHooks, hooks)
 	return newLogger
 }
 
-// RawAsyncHooks will set the given Hooks to the Logger
-// async Hooks, discarding the previous value and returning
+// RawPostHooks will set the given Hooks to the Logger
+// post Hooks, discarding the previous value and returning
 // a new Logger instance
-func (l *Logger) RawAsyncHooks(hooks Hooks) *Logger {
+func (l *Logger) RawPostHooks(hooks Hooks) *Logger {
 	newLogger := cloneLogger(l)
-	newLogger.asyncHooks = hooks
+	newLogger.postHooks = hooks
 	return newLogger
 }

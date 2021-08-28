@@ -6,36 +6,55 @@ import (
 )
 
 func TestLog_Field(t *testing.T) {
-	t.Run("Search adHocFields first", func(t *testing.T) {
+	t.Run("Search postFields first", func(t *testing.T) {
 		l := Log{
-			logger:      &Logger{fields: LogFields{"a": "ccc"}},
-			syncFields:  LogFields{"a": "bbb"},
-			adHocFields: []LogFields{{"a": "aaa"}},
+			logger:      &Logger{fields: LogFields{"a": "ddd"}},
+			preFields:   LogFields{"a": "ccc"},
+			adHocFields: []LogFields{{"a": "bbb"}},
+			postFields:  LogFields{"a": "aaa"},
 		}
 		v := l.Field("a")
 		if v.(string) != "aaa" {
-			t.Fatalf("Expected to get the value from the log adHocFields")
+			t.Fatalf("Expected to get the value from the log postFields")
 		}
 	})
-	t.Run("Search syncFields after not found at adHocFields", func(t *testing.T) {
+	t.Run("Search adHocFields after postFields", func(t *testing.T) {
 		l := Log{
-			logger:      &Logger{fields: LogFields{"a": "ccc"}},
-			syncFields:  LogFields{"a": "bbb"},
-			adHocFields: []LogFields{{"b": "aaa"}},
+			logger:      &Logger{fields: LogFields{"a": "ddd"}},
+			preFields:   LogFields{"a": "ccc"},
+			adHocFields: []LogFields{{"a": "bbb", "z": "xxx"}, {"z": "zzz"}},
+			postFields:  LogFields{"b": "aaa"},
 		}
 		v := l.Field("a")
 		if v.(string) != "bbb" {
-			t.Fatalf("Expected to get the value from the log syncFields")
+			t.Fatalf("Expected to get the value from the log adHocFields")
+		}
+		v = l.Field("z")
+		if v.(string) != "zzz" {
+			t.Fatalf("Expected to get the value from the log adHocFields (the latter one)")
 		}
 	})
-	t.Run("Search logger fields after not found at syncFields", func(t *testing.T) {
+	t.Run("Search preFields after adHocFields", func(t *testing.T) {
 		l := Log{
-			logger:      &Logger{fields: LogFields{"a": "ccc"}},
-			syncFields:  LogFields{"b": "bbb"},
-			adHocFields: []LogFields{{"b": "aaa"}},
+			logger:      &Logger{fields: LogFields{"a": "ddd"}},
+			preFields:   LogFields{"a": "ccc"},
+			adHocFields: []LogFields{{"b": "bbb"}},
+			postFields:  LogFields{"b": "aaa"},
 		}
 		v := l.Field("a")
 		if v.(string) != "ccc" {
+			t.Fatalf("Expected to get the value from the log preFields")
+		}
+	})
+	t.Run("Search fields after preFields", func(t *testing.T) {
+		l := Log{
+			logger:      &Logger{fields: LogFields{"a": "ddd"}},
+			preFields:   LogFields{"b": "ccc"},
+			adHocFields: []LogFields{{"b": "bbb"}},
+			postFields:  LogFields{"b": "aaa"},
+		}
+		v := l.Field("a")
+		if v.(string) != "ddd" {
 			t.Fatalf("Expected to get the value from the logger fields")
 		}
 	})
@@ -65,27 +84,27 @@ func TestHandleLog(t *testing.T) {
 			t.Fatalf("Expected to call the output")
 		}
 	}, rHandleLog))
-	t.Run("AdHocFields should override asyncHooks functions, that needs to be called to override SyncFields, that override base fields", raceFreeTest(func(t *testing.T) {
+	t.Run("PostFields should override adHocFields, that override PreFields, that override fields", raceFreeTest(func(t *testing.T) {
 		c := DefaultConfig()
 		expectedFields := LogFields{
-			"field":         "value",
-			"overrideField": "newValue",
-			"sync":          "value",
-			"overrideSync":  "newValue",
-			"async":         "value",
-			"overrideAsync": "newValue",
-			"adHoc":         "value",
-			c.LvlFieldName:  uint64(0),
-			c.MsgFieldName:  "my msg",
+			"field":               "value",
+			"overriddenField":     "newValue",
+			"preField":            "value",
+			"overriddenPreField":  "newValue",
+			"adHoc":               "value",
+			"overriddenAdHoc_1":     "newValue",
+			"overriddenAdHoc_2":     "newValue",
+			"postField":           "value",
+			c.LvlFieldName:        uint64(0),
+			c.MsgFieldName:        "my msg",
 		}
 		calls := 0
 		l := Log{lvl: 0, msg: "my msg",
 			logger: &Logger{
-				fields: LogFields{"overrideField": "shouldOverrideThis", "field": "value"},
-				asyncHooks: Hooks{
-					"overrideSync":  func(log Log) interface{} { return "newValue" },
-					"overrideAsync": func(log Log) interface{} { return "shouldOverrideThis" },
-					"async":         func(log Log) interface{} { return "value" },
+				fields: LogFields{"overriddenField": "shouldOverrideThis", "field": "value"},
+				postHooks: Hooks{
+					"overriddenAdHoc_2":  func(log Log) interface{} { return "newValue" },
+					"postField":         func(log Log) interface{} { return "value" },
 				},
 				configuration: &c,
 				outputs: []Output{func(lvl uint64, msg string, receivedFields LogFields) {
@@ -95,8 +114,10 @@ func TestHandleLog(t *testing.T) {
 					}
 				}},
 			},
-			syncFields:  LogFields{"overrideField": "newValue", "overrideSync": "shouldOverrideThis", "sync": "value"},
-			adHocFields: []LogFields{{"overrideAsync": "newValue", "adHoc": "value"}},
+			preFields:   LogFields{"overriddenField": "newValue", "overriddenPreField": "shouldOverrideThis", "preField": "value"},
+			adHocFields: []LogFields{
+				{"overriddenAdHoc_1": "shouldOverrideThis", "overriddenAdHoc_2": "shouldOverrideThis", "adHoc": "value", "overriddenPreField": "newValue"},
+				{"overriddenAdHoc_1": "newValue"}},
 		}
 		handleLog(l)
 		if calls != 1 {

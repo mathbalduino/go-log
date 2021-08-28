@@ -7,8 +7,8 @@ package loxeLog
 type Logger struct {
 	configuration *Configuration
 	fields        LogFields
-	syncHooks     Hooks
-	asyncHooks    Hooks
+	preHooks      Hooks
+	postHooks     Hooks
 	outputs       []Output
 }
 

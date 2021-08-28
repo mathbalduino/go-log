@@ -138,27 +138,22 @@ func TestTryRead(t *testing.T) {
 			t.Fatalf("Expected to return nil")
 		}
 	})
-	t.Run("Return nil if the len of the FIRST variadic param 'f' is zero", func(t *testing.T) {
-		if tryRead("", nil) != nil {
-			t.Fatalf("Expected to return nil")
-		}
-	})
-	t.Run("Return nil if the FIRST variadic param doesn't contains the given key", func(t *testing.T) {
+	t.Run("Return nil if there's no variadic param that contains the given key", func(t *testing.T) {
 		// Note that the second variadic param should be ignored even if it contains the key
 		key := "someKey"
-		if tryRead(key, map[string]interface{}{"key": "value"}, map[string]interface{}{key: "a"}) != nil {
+		if tryRead(key, map[string]interface{}{"key": "value"}, map[string]interface{}{"key2": "a"}) != nil {
 			t.Fatalf("Expected to return nil when the key is not present")
 		}
 	})
-	t.Run("Return the value of the given key inside the FIRST variadic param", func(t *testing.T) {
+	t.Run("Return the value of the given key from the latter variadic param", func(t *testing.T) {
 		// Note that the second variadic param should be always ignored
 		key := "someKey"
 		v := tryRead(key, map[string]interface{}{key: "value"}, map[string]interface{}{key: "b"})
 		if v == nil {
 			t.Fatalf("Expected to return the actual value")
 		}
-		if v.(string) != "value" {
-			t.Fatalf("Expected to return the value of the first variadic param")
+		if v.(string) != "b" {
+			t.Fatalf("Expected to return the value of the latter variadic param")
 		}
 	})
 }
@@ -393,34 +388,34 @@ func TestCloneLogger(t *testing.T) {
 			t.Fatalf("Expected the new Logger.fields to be equivalent")
 		}
 	})
-	t.Run("Should clone the syncHooks into a new Hooks", func(t *testing.T) {
+	t.Run("Should clone the preHooks into a new Hooks", func(t *testing.T) {
 		fnA := func(log Log) interface{} { return nil }
 		fnB := func(log Log) interface{} { return nil }
 		fnC := func(log Log) interface{} { return nil }
-		l := &Logger{syncHooks: Hooks{"a": fnA, "b": fnB, "c": fnC}}
+		l := &Logger{preHooks: Hooks{"a": fnA, "b": fnB, "c": fnC}}
 		l2 := cloneLogger(l)
-		if reflect.ValueOf(l2.syncHooks).Pointer() == reflect.ValueOf(l.syncHooks).Pointer() {
-			t.Fatalf("Expected to return a Logger with a new syncHooks")
+		if reflect.ValueOf(l2.preHooks).Pointer() == reflect.ValueOf(l.preHooks).Pointer() {
+			t.Fatalf("Expected to return a Logger with a new preHooks")
 		}
-		if reflect.ValueOf(l2.syncHooks["a"]).Pointer() != reflect.ValueOf(l.syncHooks["a"]).Pointer() ||
-			reflect.ValueOf(l2.syncHooks["b"]).Pointer() != reflect.ValueOf(l.syncHooks["b"]).Pointer() ||
-			reflect.ValueOf(l2.syncHooks["c"]).Pointer() != reflect.ValueOf(l.syncHooks["c"]).Pointer() {
-			t.Fatalf("Expected the new Logger.syncHooks to be equivalent")
+		if reflect.ValueOf(l2.preHooks["a"]).Pointer() != reflect.ValueOf(l.preHooks["a"]).Pointer() ||
+			reflect.ValueOf(l2.preHooks["b"]).Pointer() != reflect.ValueOf(l.preHooks["b"]).Pointer() ||
+			reflect.ValueOf(l2.preHooks["c"]).Pointer() != reflect.ValueOf(l.preHooks["c"]).Pointer() {
+			t.Fatalf("Expected the new Logger.preHooks to be equivalent")
 		}
 	})
-	t.Run("Should clone the asyncHooks into a new Hooks", func(t *testing.T) {
+	t.Run("Should clone the postHooks into a new Hooks", func(t *testing.T) {
 		fnA := func(log Log) interface{} { return nil }
 		fnB := func(log Log) interface{} { return nil }
 		fnC := func(log Log) interface{} { return nil }
-		l := &Logger{asyncHooks: Hooks{"a": fnA, "b": fnB, "c": fnC}}
+		l := &Logger{postHooks: Hooks{"a": fnA, "b": fnB, "c": fnC}}
 		l2 := cloneLogger(l)
-		if reflect.ValueOf(l2.asyncHooks).Pointer() == reflect.ValueOf(l.asyncHooks).Pointer() {
-			t.Fatalf("Expected to return a Logger with a new asyncHooks")
+		if reflect.ValueOf(l2.postHooks).Pointer() == reflect.ValueOf(l.postHooks).Pointer() {
+			t.Fatalf("Expected to return a Logger with a new postHooks")
 		}
-		if reflect.ValueOf(l2.asyncHooks["a"]).Pointer() != reflect.ValueOf(l.asyncHooks["a"]).Pointer() ||
-			reflect.ValueOf(l2.asyncHooks["b"]).Pointer() != reflect.ValueOf(l.asyncHooks["b"]).Pointer() ||
-			reflect.ValueOf(l2.asyncHooks["c"]).Pointer() != reflect.ValueOf(l.asyncHooks["c"]).Pointer() {
-			t.Fatalf("Expected the new Logger.asyncHooks to be equivalent")
+		if reflect.ValueOf(l2.postHooks["a"]).Pointer() != reflect.ValueOf(l.postHooks["a"]).Pointer() ||
+			reflect.ValueOf(l2.postHooks["b"]).Pointer() != reflect.ValueOf(l.postHooks["b"]).Pointer() ||
+			reflect.ValueOf(l2.postHooks["c"]).Pointer() != reflect.ValueOf(l.postHooks["c"]).Pointer() {
+			t.Fatalf("Expected the new Logger.postHooks to be equivalent")
 		}
 	})
 	t.Run("Should clone the outputs slice into a new []Output", func(t *testing.T) {

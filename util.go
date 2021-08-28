@@ -53,15 +53,18 @@ func ColorizeStrByLvl(lvl uint64, msg string) string {
 // Note that the 'f' param is a variadic just to sugar the
 // syntax (only the first index is used)
 func tryRead(key string, f ...LogFields) interface{} {
-	if len(f) == 0 || len(f[0]) == 0 {
+	if len(f) == 0 {
 		return nil
 	}
 
-	value, exists := f[0][key]
-	if !exists {
-		return nil
+	var v interface{}
+	for _, fields := range f {
+		value, exists := fields[key]
+		if exists {
+			v = value
+		}
 	}
-	return value
+	return v
 }
 
 // cloneOrNew will create a new LogFields and
@@ -132,8 +135,8 @@ func cloneLogger(l *Logger) *Logger {
 	return &Logger{
 		configuration: l.configuration,
 		fields:        cloneOrNew(l.fields),
-		syncHooks:     cloneOrNew_(l.syncHooks),
-		asyncHooks:    cloneOrNew_(l.asyncHooks),
+		preHooks:      cloneOrNew_(l.preHooks),
+		postHooks:     cloneOrNew_(l.postHooks),
 		outputs:       outputs,
 	}
 }

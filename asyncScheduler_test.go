@@ -352,7 +352,7 @@ func TestAsyncHandleLog(t *testing.T) {
 			lvl:         LvlDebug,
 			msg:         "Some msg",
 			logger:      &Logger{},
-			syncFields:  LogFields{"a": "aaa", "b": "bbb", "c": "ccc"},
+			preFields:   LogFields{"a": "aaa", "b": "bbb", "c": "ccc"},
 			adHocFields: []LogFields{{"d": "ddd", "e": "eee", "f": "fff"}},
 		}
 		calls := 0

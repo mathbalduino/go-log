@@ -29,10 +29,10 @@ func TestFields(t *testing.T) {
 		outH := func(lvl uint64, msg string, fields LogFields) {}
 		outI := func(lvl uint64, msg string, fields LogFields) {}
 		l := &Logger{
-			fields:     LogFields{"a": "aaa", "b": "bbb", "c": "ccc"},
-			syncHooks:  Hooks{"d": fnD, "e": fnE},
-			asyncHooks: Hooks{"f": fnF, "g": fnG},
-			outputs:    []Output{outH, outI},
+			fields:    LogFields{"a": "aaa", "b": "bbb", "c": "ccc"},
+			preHooks:  Hooks{"d": fnD, "e": fnE},
+			postHooks: Hooks{"f": fnF, "g": fnG},
+			outputs:   []Output{outH, outI},
 		}
 		newLog := l.Fields(nil)
 		if reflect.ValueOf(l.fields).Pointer() == reflect.ValueOf(newLog.fields).Pointer() {
@@ -41,26 +41,26 @@ func TestFields(t *testing.T) {
 		if !reflect.DeepEqual(l.fields, newLog.fields) {
 			t.Fatalf("Expected an equivalent fields map")
 		}
-		if reflect.ValueOf(l.syncHooks).Pointer() == reflect.ValueOf(newLog.syncHooks).Pointer() {
-			t.Fatalf("Expected to be a different syncHooks map")
+		if reflect.ValueOf(l.preHooks).Pointer() == reflect.ValueOf(newLog.preHooks).Pointer() {
+			t.Fatalf("Expected to be a different preHooks map")
 		}
-		if len(l.syncHooks) != len(newLog.syncHooks) {
-			t.Fatalf("Expected an equivalent syncHooks map")
+		if len(l.preHooks) != len(newLog.preHooks) {
+			t.Fatalf("Expected an equivalent preHooks map")
 		}
-		for k, v := range l.syncHooks {
-			if reflect.ValueOf(v).Pointer() != reflect.ValueOf(newLog.syncHooks[k]).Pointer() {
-				t.Fatalf("Expected an equivalent syncHooks map")
+		for k, v := range l.preHooks {
+			if reflect.ValueOf(v).Pointer() != reflect.ValueOf(newLog.preHooks[k]).Pointer() {
+				t.Fatalf("Expected an equivalent preHooks map")
 			}
 		}
-		if reflect.ValueOf(l.asyncHooks).Pointer() == reflect.ValueOf(newLog.asyncHooks).Pointer() {
-			t.Fatalf("Expected to be a different asyncHooks map")
+		if reflect.ValueOf(l.postHooks).Pointer() == reflect.ValueOf(newLog.postHooks).Pointer() {
+			t.Fatalf("Expected to be a different postHooks map")
 		}
-		if len(l.asyncHooks) != len(newLog.asyncHooks) {
-			t.Fatalf("Expected an equivalent asyncHooks map")
+		if len(l.postHooks) != len(newLog.postHooks) {
+			t.Fatalf("Expected an equivalent postHooks map")
 		}
-		for k, v := range l.asyncHooks {
-			if reflect.ValueOf(v).Pointer() != reflect.ValueOf(newLog.asyncHooks[k]).Pointer() {
-				t.Fatalf("Expected an equivalent asyncHooks map")
+		for k, v := range l.postHooks {
+			if reflect.ValueOf(v).Pointer() != reflect.ValueOf(newLog.postHooks[k]).Pointer() {
+				t.Fatalf("Expected an equivalent postHooks map")
 			}
 		}
 		if reflect.ValueOf(l.outputs).Pointer() == reflect.ValueOf(newLog.outputs).Pointer() {
@@ -110,31 +110,31 @@ func TestRawFields(t *testing.T) {
 		outH := func(lvl uint64, msg string, fields LogFields) {}
 		outI := func(lvl uint64, msg string, fields LogFields) {}
 		l := &Logger{
-			syncHooks:  Hooks{"d": fnD, "e": fnE},
-			asyncHooks: Hooks{"f": fnF, "g": fnG},
-			outputs:    []Output{outH, outI},
+			preHooks:  Hooks{"d": fnD, "e": fnE},
+			postHooks: Hooks{"f": fnF, "g": fnG},
+			outputs:   []Output{outH, outI},
 		}
 		newLog := l.RawFields(nil)
-		if reflect.ValueOf(l.syncHooks).Pointer() == reflect.ValueOf(newLog.syncHooks).Pointer() {
-			t.Fatalf("Expected to be a different syncHooks map")
+		if reflect.ValueOf(l.preHooks).Pointer() == reflect.ValueOf(newLog.preHooks).Pointer() {
+			t.Fatalf("Expected to be a different preHooks map")
 		}
-		if len(l.syncHooks) != len(newLog.syncHooks) {
-			t.Fatalf("Expected an equivalent syncHooks map")
+		if len(l.preHooks) != len(newLog.preHooks) {
+			t.Fatalf("Expected an equivalent preHooks map")
 		}
-		for k, v := range l.syncHooks {
-			if reflect.ValueOf(v).Pointer() != reflect.ValueOf(newLog.syncHooks[k]).Pointer() {
-				t.Fatalf("Expected an equivalent syncHooks map")
+		for k, v := range l.preHooks {
+			if reflect.ValueOf(v).Pointer() != reflect.ValueOf(newLog.preHooks[k]).Pointer() {
+				t.Fatalf("Expected an equivalent preHooks map")
 			}
 		}
-		if reflect.ValueOf(l.asyncHooks).Pointer() == reflect.ValueOf(newLog.asyncHooks).Pointer() {
-			t.Fatalf("Expected to be a different asyncHooks map")
+		if reflect.ValueOf(l.postHooks).Pointer() == reflect.ValueOf(newLog.postHooks).Pointer() {
+			t.Fatalf("Expected to be a different postHooks map")
 		}
-		if len(l.asyncHooks) != len(newLog.asyncHooks) {
-			t.Fatalf("Expected an equivalent asyncHooks map")
+		if len(l.postHooks) != len(newLog.postHooks) {
+			t.Fatalf("Expected an equivalent postHooks map")
 		}
-		for k, v := range l.asyncHooks {
-			if reflect.ValueOf(v).Pointer() != reflect.ValueOf(newLog.asyncHooks[k]).Pointer() {
-				t.Fatalf("Expected an equivalent asyncHooks map")
+		for k, v := range l.postHooks {
+			if reflect.ValueOf(v).Pointer() != reflect.ValueOf(newLog.postHooks[k]).Pointer() {
+				t.Fatalf("Expected an equivalent postHooks map")
 			}
 		}
 		if reflect.ValueOf(l.outputs).Pointer() == reflect.ValueOf(newLog.outputs).Pointer() {

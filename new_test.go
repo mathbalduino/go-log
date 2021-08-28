@@ -39,7 +39,7 @@ func TestNew(t *testing.T) {
 		msg := "msg"
 		m := &mockAsyncScheduler{}
 		l := New(Configuration{m, lvl, msg, lvlsEnabled, errorParser})
-		if l.configuration == nil || l.outputs != nil || l.syncHooks != nil || l.asyncHooks != nil || l.fields != nil {
+		if l.configuration == nil || l.outputs != nil || l.preHooks != nil || l.postHooks != nil || l.fields != nil {
 			t.Fatalf("Expected to be nil")
 		}
 		if l.configuration.AsyncScheduler != AsyncScheduler(m) {
