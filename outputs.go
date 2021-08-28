@@ -16,8 +16,14 @@ type Output = func(lvl uint64, msg string, fields LogFields)
 // to the Logger outputs and return a new Logger instance
 func (l *Logger) Outputs(output Output, outputs ...Output) *Logger {
 	newLogger := cloneLogger(l)
-	newLogger.outputs = append(newLogger.outputs, output)
-	newLogger.outputs = append(newLogger.outputs, outputs...)
+	if output != nil {
+		newLogger.outputs = append(newLogger.outputs, output)
+	}
+	for _, output := range outputs {
+		if output != nil {
+			newLogger.outputs = append(newLogger.outputs, output)
+		}
+	}
 	return newLogger
 }
 
@@ -26,8 +32,15 @@ func (l *Logger) Outputs(output Output, outputs ...Output) *Logger {
 // instance
 func (l *Logger) RawOutputs(output Output, outputs ...Output) *Logger {
 	newLogger := cloneLogger(l)
-	newLogger.outputs = []Output{output}
-	newLogger.outputs = append(newLogger.outputs, outputs...)
+	newLogger.outputs = []Output{}
+	if output != nil {
+		newLogger.outputs = append(newLogger.outputs, output)
+	}
+	for _, output := range outputs {
+		if output != nil {
+			newLogger.outputs = append(newLogger.outputs, output)
+		}
+	}
 	return newLogger
 }
 
