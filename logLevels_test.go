@@ -14,7 +14,7 @@ func TestLog(t *testing.T) {
 		calls := 0
 		handleLog = func(log Log) { calls += 1 }
 		c := make(chan Log)
-		m := &fakeAsyncScheduler{mockNextChannel: func() chan<- Log {
+		m := &mockAsyncScheduler{mockNextChannel: func() chan<- Log {
 			calls += 1
 			return c
 		}}
@@ -42,7 +42,7 @@ func TestLog(t *testing.T) {
 		fnK := func(log Log) interface{} { return "kkk" }
 		calls := 0
 		c := make(chan Log, 1)
-		m := &fakeAsyncScheduler{mockNextChannel: func() chan<- Log {
+		m := &mockAsyncScheduler{mockNextChannel: func() chan<- Log {
 			calls += 1
 			return c
 		}}
@@ -123,7 +123,7 @@ func TestLog(t *testing.T) {
 			{"f": "fff", "g": "ggg", "h": "hhh"},
 		}
 		c := make(chan Log, 1)
-		m := &fakeAsyncScheduler{mockNextChannel: func() chan<- Log { return c }}
+		m := &mockAsyncScheduler{mockNextChannel: func() chan<- Log { return c }}
 		l := &Logger{configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: LvlTrace}}
 		l.Trace(msg, adHocFields...)
 		receivedLog := <-c
@@ -145,7 +145,7 @@ func TestLog(t *testing.T) {
 			{"f": "fff", "g": "ggg", "h": "hhh"},
 		}
 		c := make(chan Log, 1)
-		m := &fakeAsyncScheduler{mockNextChannel: func() chan<- Log { return c }}
+		m := &mockAsyncScheduler{mockNextChannel: func() chan<- Log { return c }}
 		l := &Logger{configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: LvlDebug}}
 		l.Debug(msg, adHocFields...)
 		receivedLog := <-c
@@ -167,7 +167,7 @@ func TestLog(t *testing.T) {
 			{"f": "fff", "g": "ggg", "h": "hhh"},
 		}
 		c := make(chan Log, 1)
-		m := &fakeAsyncScheduler{mockNextChannel: func() chan<- Log { return c }}
+		m := &mockAsyncScheduler{mockNextChannel: func() chan<- Log { return c }}
 		l := &Logger{configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: LvlInfo}}
 		l.Info(msg, adHocFields...)
 		receivedLog := <-c
@@ -189,7 +189,7 @@ func TestLog(t *testing.T) {
 			{"f": "fff", "g": "ggg", "h": "hhh"},
 		}
 		c := make(chan Log, 1)
-		m := &fakeAsyncScheduler{mockNextChannel: func() chan<- Log { return c }}
+		m := &mockAsyncScheduler{mockNextChannel: func() chan<- Log { return c }}
 		l := &Logger{configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: LvlWarn}}
 		l.Warn(msg, adHocFields...)
 		receivedLog := <-c
@@ -211,7 +211,7 @@ func TestLog(t *testing.T) {
 			{"f": "fff", "g": "ggg", "h": "hhh"},
 		}
 		c := make(chan Log, 1)
-		m := &fakeAsyncScheduler{mockNextChannel: func() chan<- Log { return c }}
+		m := &mockAsyncScheduler{mockNextChannel: func() chan<- Log { return c }}
 		l := &Logger{configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: LvlError}}
 		l.Error(msg, adHocFields...)
 		receivedLog := <-c
@@ -233,7 +233,7 @@ func TestLog(t *testing.T) {
 			{"f": "fff", "g": "ggg", "h": "hhh"},
 		}
 		c := make(chan Log, 1)
-		m := &fakeAsyncScheduler{mockNextChannel: func() chan<- Log { return c }}
+		m := &mockAsyncScheduler{mockNextChannel: func() chan<- Log { return c }}
 		l := &Logger{configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: LvlFatal}}
 		l.Fatal(msg, adHocFields...)
 		receivedLog := <-c
@@ -255,7 +255,7 @@ func TestLog(t *testing.T) {
 			{"f": "fff", "g": "ggg", "h": "hhh"},
 		}
 		c := make(chan Log, 1)
-		m := &fakeAsyncScheduler{mockNextChannel: func() chan<- Log { return c }}
+		m := &mockAsyncScheduler{mockNextChannel: func() chan<- Log { return c }}
 		e := fmt.Errorf("some random string")
 		calls := 0
 		l := &Logger{configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: LvlError, ErrorParser: func(err error) (string, LogFields) {
@@ -288,7 +288,7 @@ func TestLog(t *testing.T) {
 			{"f": "fff", "g": "ggg", "h": "hhh"},
 		}
 		c := make(chan Log, 1)
-		m := &fakeAsyncScheduler{mockNextChannel: func() chan<- Log { return c }}
+		m := &mockAsyncScheduler{mockNextChannel: func() chan<- Log { return c }}
 		e := fmt.Errorf("some random string")
 		calls := 0
 		l := &Logger{configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: LvlError, ErrorParser: func(err error) (string, LogFields) {
@@ -321,7 +321,7 @@ func TestLog(t *testing.T) {
 			{"f": "fff", "g": "ggg", "h": "hhh"},
 		}
 		c := make(chan Log, 1)
-		m := &fakeAsyncScheduler{mockNextChannel: func() chan<- Log { return c }}
+		m := &mockAsyncScheduler{mockNextChannel: func() chan<- Log { return c }}
 		e := fmt.Errorf("some random string")
 		calls := 0
 		l := &Logger{configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: LvlFatal, ErrorParser: func(err error) (string, LogFields) {
@@ -354,7 +354,7 @@ func TestLog(t *testing.T) {
 			{"f": "fff", "g": "ggg", "h": "hhh"},
 		}
 		c := make(chan Log, 1)
-		m := &fakeAsyncScheduler{mockNextChannel: func() chan<- Log { return c }}
+		m := &mockAsyncScheduler{mockNextChannel: func() chan<- Log { return c }}
 		e := fmt.Errorf("some random string")
 		calls := 0
 		l := &Logger{configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: LvlFatal, ErrorParser: func(err error) (string, LogFields) {
@@ -381,19 +381,19 @@ func TestLog(t *testing.T) {
 	})
 }
 
-type fakeAsyncScheduler struct {
+type mockAsyncScheduler struct {
 	mockNextChannel func() chan<- Log
 	mockShutdown    func()
 }
 
-func (f *fakeAsyncScheduler) NextChannel() chan<- Log {
+func (f *mockAsyncScheduler) NextChannel() chan<- Log {
 	if f.mockNextChannel != nil {
 		return f.mockNextChannel()
 	}
 	return nil
 }
 
-func (f *fakeAsyncScheduler) Shutdown() {
+func (f *mockAsyncScheduler) Shutdown() {
 	if f.mockShutdown != nil {
 		f.mockShutdown()
 	}

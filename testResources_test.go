@@ -13,6 +13,7 @@ var (
 	rNewWaitGroup, wNewWaitGroup           = newResource()
 	rAtomicAddUint64, wAtomicAddUint64     = newResource()
 	rHandleLog, wHandleLog                 = newResource()
+	rStdOut, wStdOut                       = newResource()
 )
 
 // Tests run in parallel, so it's required to control the concurrency over
