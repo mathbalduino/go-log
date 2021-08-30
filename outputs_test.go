@@ -1,6 +1,9 @@
 package loxeLog
 
 import (
+	"fmt"
+	"io/ioutil"
+	"os"
 	"reflect"
 	"testing"
 )
@@ -208,4 +211,178 @@ func TestLogger_RawOutputs(t *testing.T) {
 			t.Fatalf("Expected to set the logger outputs to the given arguments")
 		}
 	})
+}
+
+func TestOutputToWriter(t *testing.T) {
+	t.Run("Should never return a nil Output", func(t *testing.T) {
+		o := OutputToWriter(nil, nil, nil)
+		if o == nil {
+			t.Fatalf("Not expected to return a nil output")
+		}
+	})
+	t.Run("Should call the given parser, forwarding the output fields", func(t *testing.T) {
+		expectedFields := LogFields{"a": "aaa", "b": "bbb", "c": "ccc"}
+		calls := 0
+		parser := func(fields LogFields) ([]byte, error) {
+			calls += 1
+			if reflect.ValueOf(fields).Pointer() != reflect.ValueOf(expectedFields).Pointer() {
+				t.Fatalf("Wrong fields given to the parser")
+			}
+			return nil, nil
+		}
+		o := OutputToWriter(&mockWriter{}, parser, nil)
+		o(0, "", expectedFields)
+		if calls != 1 {
+			t.Fatalf("Expected to call the parser one time")
+		}
+	})
+	t.Run("Should call the given onError when the parser returns any error, not calling Write()", func(t *testing.T) {
+		parserCalls := 0
+		err := fmt.Errorf("some error")
+		parser := func(fields LogFields) ([]byte, error) {
+			parserCalls += 1
+			return nil, err
+		}
+		writerCalls := 0
+		writer := &mockWriter{func(data []byte) (int, error) {
+			writerCalls += 1
+			return 0, nil
+		}}
+		onErrorCalls := 0
+		onError := func(receivedErr error) {
+			onErrorCalls += 1
+			if receivedErr != err {
+				t.Fatalf("Wrong error given to onError")
+			}
+		}
+		o := OutputToWriter(writer, parser, onError)
+		o(0, "", LogFields{"a": "aaa", "b": "bbb", "c": "ccc"})
+		if parserCalls != 1 {
+			t.Fatalf("Expected to call the parser one time")
+		}
+		if writerCalls != 0 {
+			t.Fatalf("Expected to not call the writer.Write()")
+		}
+		if onErrorCalls != 1 {
+			t.Fatalf("Expected to call onError")
+		}
+	})
+	t.Run("Should call the writer.Write() forwarding the returned data from the parser", func(t *testing.T) {
+		data := []byte{10, 11, 12, 13, 14}
+		parserCalls := 0
+		parser := func(fields LogFields) ([]byte, error) {
+			parserCalls += 1
+			return data, nil
+		}
+		writerCalls := 0
+		writer := &mockWriter{func(receivedData []byte) (int, error) {
+			writerCalls += 1
+			if reflect.ValueOf(receivedData).Pointer() != reflect.ValueOf(data).Pointer() {
+				t.Fatalf("Wrong data given to the writer.Write()")
+			}
+			return 0, nil
+		}}
+		o := OutputToWriter(writer, parser, nil)
+		o(0, "", LogFields{"a": "aaa", "b": "bbb", "c": "ccc"})
+		if parserCalls != 1 {
+			t.Fatalf("Expected to call the parser one time")
+		}
+		if writerCalls != 1 {
+			t.Fatalf("Expected to call the writer.Write()")
+		}
+	})
+	t.Run("Should call the given onError forwarding any error returned by the writer.Write()", func(t *testing.T) {
+		writerCalls := 0
+		err := fmt.Errorf("some error")
+		writer := &mockWriter{func(receivedData []byte) (int, error) {
+			writerCalls += 1
+			return 0, err
+		}}
+		onErrorCalls := 0
+		onError := func(receivedErr error) {
+			onErrorCalls += 1
+			if receivedErr != err {
+				t.Fatalf("Wrong error given to onError")
+			}
+		}
+		parser := func(fields LogFields) ([]byte, error) { return []byte{1}, nil }
+		o := OutputToWriter(writer, parser, onError)
+		o(0, "", LogFields{"a": "aaa", "b": "bbb", "c": "ccc"})
+		if writerCalls != 1 {
+			t.Fatalf("Expected to call the writer.Write()")
+		}
+		if onErrorCalls != 1 {
+			t.Fatalf("Expected to call onError")
+		}
+	})
+}
+
+func TestOutputJsonToFile(t *testing.T) {
+	t.Run("Should never return a nil Output", func(t *testing.T) {
+		o := OutputJsonToWriter(nil, nil)
+		if o == nil {
+			t.Fatalf("Not expected to return a nil output")
+		}
+	})
+	t.Run("Should call onError if there's errors with the json.Marshal", func(t *testing.T) {
+		onErrorCalls := 0
+		onError := func(receivedErr error) {onErrorCalls += 1		}
+		o := OutputJsonToWriter(nil, onError)
+		o(0, "", LogFields{"a": func(){}})
+		if onErrorCalls != 1 {
+			t.Fatalf("Expeted to call onError")
+		}
+	})
+	t.Run("Should call Writer() with the json representation of the fields", func(t *testing.T) {
+		fields := LogFields{"a": "aaa", "b": "bbb", "c": "ccc"}
+		calls := 0
+		writer := &mockWriter{func(data []byte) (int, error) {
+			calls += 1
+			if string(data) != "{\"a\":\"aaa\",\"b\":\"bbb\",\"c\":\"ccc\"}\n" {
+				t.Fatalf("Wrong json given to Write()")
+			}
+			return 0, nil
+		}}
+		o := OutputJsonToWriter(writer, nil)
+		o(0, "", fields)
+		if calls != 1 {
+			t.Fatalf("Expected to call Writer() one time")
+		}
+	})
+}
+
+func TestOutputToAnsiStdout(t *testing.T) {
+	t.Run("Should correctly write to the StdOut", raceFreeTest(func(t *testing.T) {
+		oldStdOut := os.Stdout
+		defer func() { os.Stdout = oldStdOut }()
+
+		tmpFile, e := ioutil.TempFile(os.TempDir(), "test-")
+		defer os.Remove(tmpFile.Name())
+		if e != nil {
+			t.Fatalf("Error not expected")
+		}
+		os.Stdout = tmpFile
+
+		OutputToAnsiStdout(LvlError, "some msg", nil)
+
+		b := make([]byte, 28)
+		_, e = os.Stdout.ReadAt(b, 0)
+		if e != nil {
+			t.Fatalf("Error not expected")
+		}
+		if string(b) != ColorizeStrByLvl(LvlError, "[ ERROR ] some msg") + "\n" {
+			t.Fatalf("Expected a different msg")
+		}
+	}, wStdOut))
+}
+
+type mockWriter struct {
+	mockWrite func(data []byte) (int, error)
+}
+
+func (m *mockWriter) Write(data []byte) (int, error) {
+	if m.mockWrite != nil {
+		return m.mockWrite(data)
+	}
+	return 0, nil
 }

@@ -37,7 +37,6 @@ func New(config Configuration) *Logger {
 // ANSI codes), using 'lvl' and 'msg' as level and message
 // keys and enabling only the default log levels
 func NewDefault() *Logger {
-	config := DefaultConfig()
-	return New(config).
-		RawOutputs(OutputToAnsiStdout(config.LvlFieldName, config.MsgFieldName))
+	return New(DefaultConfig()).
+		RawOutputs(OutputToAnsiStdout)
 }
