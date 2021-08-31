@@ -1,4 +1,4 @@
-package loxeLog
+package logger
 
 // Configuration is a struct that holds
 // global logger configurations

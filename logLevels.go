@@ -1,4 +1,4 @@
-package loxeLog
+package logger
 
 // Trace will create a new log with the Trace level, using the
 // given adHocFields, if enabled.

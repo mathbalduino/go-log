@@ -1,4 +1,4 @@
-package loxeLog
+package logger
 
 // Log is a struct that represents
 // a newly created log

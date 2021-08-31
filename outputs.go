@@ -1,4 +1,4 @@
-package loxeLog
+package logger
 
 import (
 	"encoding/json"

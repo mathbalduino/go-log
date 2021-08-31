@@ -1,4 +1,4 @@
-package loxeLog
+package logger
 
 // Hooks is just an alias to a map that contains
 // information about fields keys/value (via function

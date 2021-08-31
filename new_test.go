@@ -1,4 +1,4 @@
-package loxeLog
+package logger
 
 import (
 	"io/ioutil"
