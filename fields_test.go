@@ -5,6 +5,31 @@ import (
 	"testing"
 )
 
+func TestField(t *testing.T) {
+	t.Run("Should return nil if the given key doesn't exists", func(t *testing.T) {
+		l := &Logger{fields: LogFields{"a": "aaa", "b": "bbb", "c": "ccc"}}
+		v := l.Field("d")
+		if v != nil {
+			t.Fatalf("Expected to be nil")
+		}
+		v = l.Field("zzz")
+		if v != nil {
+			t.Fatalf("Expected to be nil")
+		}
+	})
+	t.Run("Should return the value of the given key", func(t *testing.T) {
+		l := &Logger{fields: LogFields{"a": "aaa", "b": "bbb", "c": "ccc"}}
+		v := l.Field("a")
+		if v == nil || v.(string) != "aaa" {
+			t.Fatalf("Expected to be the correct value")
+		}
+		v = l.Field("c")
+		if v == nil || v.(string) != "ccc" {
+			t.Fatalf("Expected to be the correct value")
+		}
+	})
+}
+
 func TestFields(t *testing.T) {
 	t.Run("Should return a new equal instance of logger", func(t *testing.T) {
 		l := &Logger{}

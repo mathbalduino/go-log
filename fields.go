@@ -4,6 +4,13 @@ package logger
 // represents the fields of the log
 type LogFields = map[string]interface{}
 
+// Field act as a getter for logger fields
+//
+// Note that this method will ignore pre/post fields
+func (l *Logger) Field(key string) interface{} {
+	return l.fields[key]
+}
+
 // Fields will append the given LogFields to the Logger
 // fields, overriding any already existing fields and
 // returning a new Logger instance
