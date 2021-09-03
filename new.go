@@ -38,5 +38,5 @@ func New(config Configuration) *Logger {
 // keys and enabling only the default log levels
 func NewDefault() *Logger {
 	return New(DefaultConfig()).
-		RawOutputs(OutputToAnsiStdout)
+		RawOutputs(OutputAnsiToStdout)
 }

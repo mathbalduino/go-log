@@ -7,7 +7,7 @@ import (
 )
 
 func outputANSI(lvl uint64, msg string, fields logger.LogFields) {
-	logger.OutputToAnsiStdout(lvl, msg, fields)
+	logger.OutputAnsiToStdout(lvl, msg, fields)
 	handleFatal(lvl, msg, fields)
 }
 

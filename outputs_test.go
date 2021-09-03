@@ -352,7 +352,7 @@ func TestOutputJsonToFile(t *testing.T) {
 }
 
 func TestOutputToAnsiStdout(t *testing.T) {
-	t.Run("Should correctly write to the StdOut", raceFreeTest(func(t *testing.T) {
+	t.Run("Should correctly write to the StdOut, with the correct ANSI codes", raceFreeTest(func(t *testing.T) {
 		oldStdOut := os.Stdout
 		defer func() { os.Stdout = oldStdOut }()
 
@@ -363,7 +363,7 @@ func TestOutputToAnsiStdout(t *testing.T) {
 		}
 		os.Stdout = tmpFile
 
-		OutputToAnsiStdout(LvlError, "some msg", nil)
+		OutputAnsiToStdout(LvlError, "some msg", nil)
 
 		b := make([]byte, 28)
 		_, e = os.Stdout.ReadAt(b, 0)

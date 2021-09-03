@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func timestampLogger(l *logger.Logger) *LoggerCLI {
+func nestLogger(l *logger.Logger) *LoggerCLI {
 	newLogger := l.Fields(logger.LogFields{
 		"parent":    l.Field("timestamp"),
 		"timestamp": time.Now().UnixNano(),
