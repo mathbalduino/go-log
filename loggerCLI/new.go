@@ -2,7 +2,6 @@ package loggerCLI
 
 import (
 	"gitlab.com/loxe-tools/go-log"
-	"time"
 )
 
 type LoggerCLI logger.Logger
@@ -22,6 +21,5 @@ func New(json, debug, trace bool) *LoggerCLI {
 	}
 
 	return (*LoggerCLI)(logger.New(conf).
-		RawOutputs(output).
-		Fields(logger.LogFields{"timestamp": time.Now().UnixNano()}))
+		RawOutputs(output))
 }
