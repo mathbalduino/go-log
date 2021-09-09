@@ -4,8 +4,6 @@ import (
 	logger "gitlab.com/loxe-tools/go-log"
 )
 
-// TODO: criar standalone log functions, usando o logger default
-
 func (l *LoggerCLI) Trace(msg string, adHocFields ...logger.LogFields) *LoggerCLI {
 	baseLogger := nestLogger(l)
 	baseLogger.Trace(msg, adHocFields...)
