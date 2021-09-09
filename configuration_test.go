@@ -46,7 +46,7 @@ func TestDefaultErrorParser(t *testing.T) {
 		if str != err.Error() {
 			t.Fatalf("Expected a configuration with an error parser that returns the error msg")
 		}
-		if !reflect.DeepEqual(fields, LogFields{DefaultErrorParserKey: err}) {
+		if !reflect.DeepEqual(fields, LogFields{DefaultErrorKey: err}) {
 			t.Fatalf("Expected a configuration with an error parser that returns the correct map")
 		}
 	})

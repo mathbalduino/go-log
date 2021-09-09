@@ -1,8 +1,6 @@
 package logger
 
 import (
-	"io/ioutil"
-	"os"
 	"reflect"
 	"testing"
 )
@@ -80,30 +78,16 @@ func TestNewDefault(t *testing.T) {
 			t.Fatalf("Expected the correct ErrorParser")
 		}
 	})
-	t.Run("Should set one output, to the os.StdOut", raceFreeTest(func(t *testing.T) {
-		oldStdOut := os.Stdout
-		defer func() { os.Stdout = oldStdOut }()
-
-		tmpFile, e := ioutil.TempFile(os.TempDir(), "test-")
-		defer os.Remove(tmpFile.Name())
-		if e != nil {
-			t.Fatalf("Error not expected")
-		}
-		os.Stdout = tmpFile
-
+	t.Run("Should set two outputs, the first should log to stdout and the second panic on LvlFatal", raceFreeTest(func(t *testing.T) {
 		l := NewDefault()
-		if len(l.outputs) != 1 {
+		if len(l.outputs) != 2 {
 			t.Fatalf("Expected to set some output")
 		}
-		c := DefaultConfig()
-		l.outputs[0](0, "msg", LogFields{c.LvlFieldName: uint64(0), c.MsgFieldName: "msg"})
-		b := make([]byte, 1)
-		_, e = os.Stdout.ReadAt(b, 0)
-		if e != nil {
-			t.Fatalf("Error not expected")
+		if reflect.ValueOf(l.outputs[0]).Pointer() != reflect.ValueOf(OutputAnsiToStdout).Pointer() {
+			t.Fatal("The first output is wrong")
 		}
-		if b[0] == 0 {
-			t.Fatalf("Expected to write to the StdOut")
+		if reflect.ValueOf(l.outputs[1]).Pointer() != reflect.ValueOf(OutputPanicOnFatal).Pointer() {
+			t.Fatal("The second output is wrong")
 		}
 	}, wStdOut))
 }

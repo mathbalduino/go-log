@@ -3,6 +3,7 @@ package logger
 import (
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestLog_Field(t *testing.T) {
@@ -124,9 +125,10 @@ func TestHandleLog(t *testing.T) {
 			t.Fatalf("Expected to call the output")
 		}
 	}, rHandleLog))
-	t.Run("Should call every registered output, with the correct log", raceFreeTest(func(t *testing.T) {
+	t.Run("Should call every registered output, with the correct log, in the correct order", raceFreeTest(func(t *testing.T) {
 		c := DefaultConfig()
 		callsA, callsB, callsC := 0, 0, 0
+		timeA, timeB, timeC := time.Time{}, time.Time{}, time.Time{}
 		expectedFields := LogFields{c.LvlFieldName: uint64(0), c.MsgFieldName: "my msg"}
 		l := Log{lvl: 0, msg: "my msg",
 			logger: &Logger{
@@ -134,18 +136,21 @@ func TestHandleLog(t *testing.T) {
 				outputs: []Output{
 					func(lvl uint64, msg string, receivedFields LogFields) {
 						callsA += 1
+						timeA = time.Now()
 						if !reflect.DeepEqual(receivedFields, expectedFields) {
 							t.Fatalf("Expected an equivalent fields")
 						}
 					},
 					func(lvl uint64, msg string, receivedFields LogFields) {
 						callsB += 1
+						timeB = time.Now()
 						if !reflect.DeepEqual(receivedFields, expectedFields) {
 							t.Fatalf("Expected an equivalent fields")
 						}
 					},
 					func(lvl uint64, msg string, receivedFields LogFields) {
 						callsC += 1
+						timeC = time.Now()
 						if !reflect.DeepEqual(receivedFields, expectedFields) {
 							t.Fatalf("Expected an equivalent fields")
 						}
@@ -156,6 +161,9 @@ func TestHandleLog(t *testing.T) {
 		handleLog(l)
 		if callsA != 1 || callsB != 1 || callsC != 1 {
 			t.Fatalf("Expected to call every output")
+		}
+		if !timeA.Before(timeB) || !timeB.Before(timeC) {
+			t.Fatal("Expected the outputs to be called in order")
 		}
 	}, rHandleLog))
 	t.Run("Should pass the correct lvl and msg as separate arguments, and inside the map", raceFreeTest(func(t *testing.T) {

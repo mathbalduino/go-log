@@ -376,6 +376,46 @@ func TestOutputToAnsiStdout(t *testing.T) {
 	}, wStdOut))
 }
 
+func TestOutputPanicOnFatal(t *testing.T) {
+	t.Run("If the level of the log is not fatal, do nothing", func(t *testing.T) {
+		OutputPanicOnFatal(LvlDebug, "", nil)
+	})
+	t.Run("If LvlFatal, use the error inside the fields as an argument to panic", func(t *testing.T) {
+		err := fmt.Errorf("some error")
+		c := make(chan bool)
+		go func() {
+			defer func() {
+				e := recover()
+				if e == nil || e != err {
+					t.Fatal("Not the expected error given to panic")
+				}
+				c <- true
+			}()
+
+			OutputPanicOnFatal(LvlFatal, "", LogFields{DefaultErrorKey: err})
+		}()
+
+		<-c
+	})
+	t.Run("If LvlFatal and there's no error inside fields, use the log msg to create a new error", func(t *testing.T) {
+		errMsg := "some error"
+		c := make(chan bool)
+		go func() {
+			defer func() {
+				e := recover()
+				if e == nil || e.(error).Error() != errMsg {
+					t.Fatal("Not the expected error message given to panic")
+				}
+				c <- true
+			}()
+
+			OutputPanicOnFatal(LvlFatal, errMsg, nil)
+		}()
+
+		<-c
+	})
+}
+
 type mockWriter struct {
 	mockWrite func(data []byte) (int, error)
 }

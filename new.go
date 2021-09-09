@@ -38,6 +38,5 @@ func New(config Configuration) *Logger {
 // keys and enabling only the default log levels
 func NewDefault() *Logger {
 	return New(DefaultConfig()).
-		// TODO: sera que vale a pena criar um output pra pegar os fatal e dar panic?
-		RawOutputs(OutputAnsiToStdout)
+		RawOutputs(OutputAnsiToStdout, OutputPanicOnFatal)
 }

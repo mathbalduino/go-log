@@ -18,7 +18,7 @@ func outputJson(lvl uint64, msg string, fields logger.LogFields) {
 
 func handleFatal(lvl uint64, msg string, fields logger.LogFields) {
 	if lvl == logger.LvlFatal {
-		err, ok := fields[logger.DefaultErrorParserKey].(error)
+		err, ok := fields[logger.DefaultErrorKey].(error)
 		if ok {
 			panic(err)
 		}

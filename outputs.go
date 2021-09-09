@@ -87,3 +87,17 @@ func OutputAnsiToStdout(lvl uint64, msg string, _ LogFields) {
 		ColorizeStrByLvl(lvl, "[ %s ] %s") + "\n",
 		LvlToString(lvl), strings.ReplaceAll(msg, "\n", "\n\t"))
 }
+
+// OutputPanicOnFatal will call "panic" if the lvl of the given log
+// is "LvlFatal", using the "error" interface inside the fields as
+// argument, if present. Otherwise, the log msg string will be used
+// to create a new error (using fmt.Errorf)
+func OutputPanicOnFatal(lvl uint64, msg string, fields LogFields) {
+	if lvl == LvlFatal {
+		err, ok := fields[DefaultErrorKey].(error)
+		if ok {
+			panic(err)
+		}
+		panic(fmt.Errorf(msg))
+	}
+}

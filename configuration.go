@@ -51,12 +51,12 @@ func DefaultConfig() Configuration {
 // DefaultErrorParser will return a tuple containing the error string
 // and the following map: { "error": err }
 func DefaultErrorParser(err error) (string, LogFields) {
-	return err.Error(), LogFields{DefaultErrorParserKey: err}
+	return err.Error(), LogFields{DefaultErrorKey: err}
 }
 
-// DefaultErrorParserKey is the value of the key used
+// DefaultErrorKey is the value of the key used
 // to store the errors returned by the DefaultErrorParser
-const DefaultErrorParserKey = "error"
+const DefaultErrorKey = "error"
 
 // validateConfig will return a non-nil error
 // if the given Configuration contains errors
