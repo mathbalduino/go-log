@@ -1,15 +1,17 @@
 package loggerCLI
 
 import (
+	"fmt"
 	"gitlab.com/loxe-tools/go-log"
+	"os"
 )
 
 type LoggerCLI logger.Logger
 
 func New(json, debug, trace bool) *LoggerCLI {
-	output := outputANSI
+	output := logger.OutputAnsiToStdout
 	if json {
-		output = outputJson
+		output = logger.OutputJsonToWriter(os.Stdout, func(err error) {  panic(fmt.Errorf("loggerCLI: %w", err)) })
 	}
 	conf := logger.DefaultConfig()
 	conf.LvlsEnabled = logger.LvlProduction
@@ -21,5 +23,5 @@ func New(json, debug, trace bool) *LoggerCLI {
 	}
 
 	return (*LoggerCLI)(logger.New(conf).
-		RawOutputs(output))
+		RawOutputs(output, logger.OutputPanicOnFatal))
 }
