@@ -107,10 +107,10 @@ func logTree(logs []log) []ABC {
 func drawLogTree(tree []ABC, treeDepth int) string {
 	str := ""
 	for i, log := range tree {
-		isLast := i == len(tree) - 1
+		isLast := i == len(tree)-1
 		prefix := ""
 		if treeDepth > 0 {
-			prefix = strings.Repeat("   ", treeDepth - 1)
+			prefix = strings.Repeat("   ", treeDepth-1)
 
 			if isLast {
 				prefix += logger.ColorizeStrByLvl(log.parentPtr.Lvl, "'--")
@@ -119,45 +119,46 @@ func drawLogTree(tree []ABC, treeDepth int) string {
 			}
 		}
 
-		c := "   "
-		if len(log.childs) > 0 {
-			c = "|  "
+		c := strings.Repeat("   ", treeDepth)
+		if c != "" && isLast {
+			c = strings.TrimSuffix(c, "   ") + "x  "
 		}
-		msg := strings.ReplaceAll(log.Msg, "\n",
-			"\n" + strings.Repeat("   ", treeDepth) + c)
+		if len(log.childs) > 0 {
+			c += logger.ColorizeStrByLvl(log.Lvl, "|  ")
+		} else {
+			c += "   "
+		}
+		s := ""
+		j := 0
+		for ; j < len(log.Msg) / lineMaxLen; j++ {
+			s += log.Msg[j*lineMaxLen:(j+1)*lineMaxLen] + "\n"
+		}
+		if len(log.Msg) % lineMaxLen > 0 {
+			s += log.Msg[j*lineMaxLen:j*lineMaxLen + len(log.Msg) % lineMaxLen]
+		}
+		msgSlice := strings.Split(s, "\n")
+		for i, m := range msgSlice {
+			msgSlice[i] = logger.ColorizeStrByLvl(log.Lvl, m)
+		}
+		msg := strings.Join(msgSlice, "\n" + c)
 
 		str += fmt.Sprintf(
-			prefix + logger.ColorizeStrByLvl(log.Lvl, "[ %s ] %s") + "\n",
+			prefix+logger.ColorizeStrByLvl(log.Lvl, "[ %s ] %s")+"\n",
 			logger.LvlToString(log.Lvl),
 			msg)
-		nestedStrs := drawLogTree(log.childs, treeDepth + 1)
+		nestedStrs := drawLogTree(log.childs, treeDepth+1)
 		if len(log.childs) > 1 {
 			nestedStrs = strings.ReplaceAll(
 				nestedStrs,
-				"\n" + strings.Repeat("   ", treeDepth) + " ",
-				"\n" + strings.Repeat("   ", treeDepth) + "|")
+				"\n"+strings.Repeat("   ", treeDepth)+" ",
+				"\n"+strings.Repeat("   ", treeDepth)+logger.ColorizeStrByLvl(log.Lvl, "|"))
+		}
+		if len(log.childs) > 0 {
+			nestedStrs = strings.ReplaceAll(nestedStrs, "x  ", "   ")
 		}
 		str += nestedStrs
 	}
 	return str
 }
-//func printLogTree(tree []ABC, treeDepth int) {
-//	for _, log := range tree {
-//		prefix := ""
-//		if treeDepth > 0 {
-//			parent := log.parent
-//			prefix = logger.ColorizeStrByLvl(parent.Lvl, "|--")
-//			for i := treeDepth - 1; i > 0; i-- {
-//				parent = parent.parent
-//				prefix = logger.ColorizeStrByLvl(parent.Lvl, "|  ") + prefix
-//			}
-//			prefix = logger.ColorizeStrByLvl(parent.Lvl, prefix)
-//		}
-//
-//		fmt.Printf(
-//			prefix + logger.ColorizeStrByLvl(log.Lvl, "[ %s ] %s") + "\n",
-//			logger.LvlToString(log.Lvl),
-//			strings.ReplaceAll(log.Msg, "\n", "\n" + strings.Repeat("|  ", treeDepth + 1)))
-//		printLogTree(log.childs, treeDepth + 1)
-//	}
-//}
+
+const lineMaxLen = 79 // to be 80 with the break line
