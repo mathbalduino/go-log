@@ -6,6 +6,19 @@ import (
 	"testing"
 )
 
+func TestLogger_Configuration(t *testing.T) {
+	t.Run("Should set the Logger Configuration to the received arg", func(t *testing.T) {
+		c1 := &Configuration{LvlFieldName: "lvlFieldName_1"}
+		c2 := Configuration{LvlFieldName: "lvlFieldName_2"}
+
+		l := &Logger{configuration: c1}
+		l.Configuration(c2)
+		if l.configuration.LvlFieldName != c2.LvlFieldName {
+			t.Fatalf("Expected to change the Logger Configuration to the received arg")
+		}
+	})
+}
+
 func TestDefaultConfig(t *testing.T) {
 	t.Run("Should be synchronous (nil AsyncScheduler)", func(t *testing.T) {
 		c := DefaultConfig()
