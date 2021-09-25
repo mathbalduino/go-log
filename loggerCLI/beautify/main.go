@@ -1,7 +1,5 @@
 package main
 
-//go:generate sh -c "go run ../main/main.go | go run *.go"
-
 import (
 	"bufio"
 	"encoding/json"
