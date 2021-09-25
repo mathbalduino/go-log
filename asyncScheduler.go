@@ -20,12 +20,14 @@ type AsyncScheduler interface {
 }
 
 // WaitGroup is an interface used just to ease tests.
-// Always will be an *sync.WaitGroup
 type WaitGroup interface {
 	Wait()
 	Done()
 	Add(int)
 }
+
+// Always will be a *sync.WaitGroup
+var _ WaitGroup = &sync.WaitGroup{}
 
 // DefaultAsyncScheduler will create one channel by goroutine, with the given
 // capacity, and setup a goroutine that will handle newly created Logs.
@@ -78,6 +80,8 @@ type asyncScheduler struct {
 	// Used to wait for the go routines exit
 	wg WaitGroup
 }
+
+var _ AsyncScheduler = &asyncScheduler{}
 
 // Shutdown will call the cancel function, closing the go
 // routines context channel, and wait for them to exit (via waitGroup)
