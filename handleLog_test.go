@@ -7,6 +7,22 @@ import (
 )
 
 func TestLog_Field(t *testing.T) {
+	t.Run("If the key is 'lvl' or 'msg', return the value immediately", func(t *testing.T) {
+		cfg := DefaultConfig()
+		l := Log{
+			logger: &Logger{configuration: &cfg},
+			msg: "some msg",
+			lvl: 999,
+		}
+		v := l.Field(cfg.MsgFieldName)
+		if v.(string) != l.msg {
+			t.Fatalf("Expected to get the value of the msg")
+		}
+		v = l.Field(cfg.LvlFieldName)
+		if v.(uint64) != l.lvl {
+			t.Fatalf("Expected to get the value of the lvl")
+		}
+	})
 	t.Run("Search postFields first", func(t *testing.T) {
 		l := Log{
 			logger:      &Logger{fields: LogFields{"a": "ddd"}},
@@ -88,23 +104,23 @@ func TestHandleLog(t *testing.T) {
 	t.Run("PostFields should override adHocFields, that override PreFields, that override fields", raceFreeTest(func(t *testing.T) {
 		c := DefaultConfig()
 		expectedFields := LogFields{
-			"field":               "value",
-			"overriddenField":     "newValue",
-			"preField":            "value",
-			"overriddenPreField":  "newValue",
-			"adHoc":               "value",
-			"overriddenAdHoc_1":     "newValue",
-			"overriddenAdHoc_2":     "newValue",
-			"postField":           "value",
-			c.LvlFieldName:        uint64(0),
-			c.MsgFieldName:        "my msg",
+			"field":              "value",
+			"overriddenField":    "newValue",
+			"preField":           "value",
+			"overriddenPreField": "newValue",
+			"adHoc":              "value",
+			"overriddenAdHoc_1":  "newValue",
+			"overriddenAdHoc_2":  "newValue",
+			"postField":          "value",
+			c.LvlFieldName:       uint64(0),
+			c.MsgFieldName:       "my msg",
 		}
 		calls := 0
 		l := Log{lvl: 0, msg: "my msg",
 			logger: &Logger{
 				fields: LogFields{"overriddenField": "shouldOverrideThis", "field": "value"},
 				postHooks: Hooks{
-					"overriddenAdHoc_2":  func(log Log) interface{} { return "newValue" },
+					"overriddenAdHoc_2": func(log Log) interface{} { return "newValue" },
 					"postField":         func(log Log) interface{} { return "value" },
 				},
 				configuration: &c,
@@ -115,7 +131,7 @@ func TestHandleLog(t *testing.T) {
 					}
 				}},
 			},
-			preFields:   LogFields{"overriddenField": "newValue", "overriddenPreField": "shouldOverrideThis", "preField": "value"},
+			preFields: LogFields{"overriddenField": "newValue", "overriddenPreField": "shouldOverrideThis", "preField": "value"},
 			adHocFields: []LogFields{
 				{"overriddenAdHoc_1": "shouldOverrideThis", "overriddenAdHoc_2": "shouldOverrideThis", "adHoc": "value", "overriddenPreField": "newValue"},
 				{"overriddenAdHoc_1": "newValue"}},

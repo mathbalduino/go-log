@@ -28,6 +28,13 @@ type Log struct {
 //
 // Pay attention
 func (l Log) Field(key string) interface{} {
+	if key == l.logger.configuration.MsgFieldName {
+		return l.msg
+	}
+	if key == l.logger.configuration.LvlFieldName {
+		return l.lvl
+	}
+
 	v := tryRead(key, l.postFields)
 	if v != nil {
 		return v
