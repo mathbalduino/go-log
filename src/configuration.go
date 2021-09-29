@@ -1,7 +1,7 @@
 package logger
 
 // Configuration is a struct that holds
-// global logger configurations
+// global src configurations
 type Configuration struct {
 	// AsyncScheduler will be used to distinguish
 	// between a sync (if nil) or async (if not nil)

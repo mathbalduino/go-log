@@ -6,7 +6,7 @@ import (
 )
 
 func TestPreHooks(t *testing.T) {
-	t.Run("Should return a new equal instance of logger", func(t *testing.T) {
+	t.Run("Should return a new equal instance of src", func(t *testing.T) {
 		l := &Logger{}
 		newLog := l.PreHooks(nil)
 		if reflect.ValueOf(l).Pointer() == reflect.ValueOf(newLog).Pointer() {
@@ -75,7 +75,7 @@ func TestPreHooks(t *testing.T) {
 			}
 		}
 	})
-	t.Run("Merge the given PreHooks with the logger pre hooks, overriding duplicates", func(t *testing.T) {
+	t.Run("Merge the given PreHooks with the src pre hooks, overriding duplicates", func(t *testing.T) {
 		fnA := func(log Log) interface{} { return nil }
 		fnB := func(log Log) interface{} { return nil }
 		fnC := func(log Log) interface{} { return nil }
@@ -88,13 +88,13 @@ func TestPreHooks(t *testing.T) {
 			reflect.ValueOf(newLog.preHooks["b"]).Pointer() != reflect.ValueOf(fnD).Pointer() ||
 			reflect.ValueOf(newLog.preHooks["c"]).Pointer() != reflect.ValueOf(fnC).Pointer() ||
 			reflect.ValueOf(newLog.preHooks["d"]).Pointer() != reflect.ValueOf(fnE).Pointer() {
-			t.Fatalf("Expected the merge of the logger preHooks + argument")
+			t.Fatalf("Expected the merge of the src preHooks + argument")
 		}
 	})
 }
 
 func TestRawPreHooks(t *testing.T) {
-	t.Run("Should return a new equal instance of logger", func(t *testing.T) {
+	t.Run("Should return a new equal instance of src", func(t *testing.T) {
 		l := &Logger{}
 		newLog := l.RawPreHooks(nil)
 		if reflect.ValueOf(l).Pointer() == reflect.ValueOf(newLog).Pointer() {
@@ -161,13 +161,13 @@ func TestRawPreHooks(t *testing.T) {
 		if len(newLog.preHooks) != 2 ||
 			reflect.ValueOf(newLog.preHooks["b"]).Pointer() != reflect.ValueOf(fnD).Pointer() ||
 			reflect.ValueOf(newLog.preHooks["d"]).Pointer() != reflect.ValueOf(fnE).Pointer() {
-			t.Fatalf("Expected the override the value of the logger preHooks completelly")
+			t.Fatalf("Expected the override the value of the src preHooks completelly")
 		}
 	})
 }
 
 func TestPostHooks(t *testing.T) {
-	t.Run("Should return a new equal instance of logger", func(t *testing.T) {
+	t.Run("Should return a new equal instance of src", func(t *testing.T) {
 		l := &Logger{}
 		newLog := l.PostHooks(nil)
 		if reflect.ValueOf(l).Pointer() == reflect.ValueOf(newLog).Pointer() {
@@ -236,7 +236,7 @@ func TestPostHooks(t *testing.T) {
 			}
 		}
 	})
-	t.Run("Merge the given PostHooks with the logger post hooks, overriding duplicates", func(t *testing.T) {
+	t.Run("Merge the given PostHooks with the src post hooks, overriding duplicates", func(t *testing.T) {
 		fnA := func(log Log) interface{} { return nil }
 		fnB := func(log Log) interface{} { return nil }
 		fnC := func(log Log) interface{} { return nil }
@@ -249,13 +249,13 @@ func TestPostHooks(t *testing.T) {
 			reflect.ValueOf(newLog.postHooks["b"]).Pointer() != reflect.ValueOf(fnD).Pointer() ||
 			reflect.ValueOf(newLog.postHooks["c"]).Pointer() != reflect.ValueOf(fnC).Pointer() ||
 			reflect.ValueOf(newLog.postHooks["d"]).Pointer() != reflect.ValueOf(fnE).Pointer() {
-			t.Fatalf("Expected the merge of the logger postHooks + argument")
+			t.Fatalf("Expected the merge of the src postHooks + argument")
 		}
 	})
 }
 
 func TestRawPostHooks(t *testing.T) {
-	t.Run("Should return a new equal instance of logger", func(t *testing.T) {
+	t.Run("Should return a new equal instance of src", func(t *testing.T) {
 		l := &Logger{}
 		newLog := l.RawPostHooks(nil)
 		if reflect.ValueOf(l).Pointer() == reflect.ValueOf(newLog).Pointer() {
@@ -322,7 +322,7 @@ func TestRawPostHooks(t *testing.T) {
 		if len(newLog.postHooks) != 2 ||
 			reflect.ValueOf(newLog.postHooks["b"]).Pointer() != reflect.ValueOf(fnD).Pointer() ||
 			reflect.ValueOf(newLog.postHooks["d"]).Pointer() != reflect.ValueOf(fnE).Pointer() {
-			t.Fatalf("Expected the override the value of the logger postHooks completelly")
+			t.Fatalf("Expected the override the value of the src postHooks completelly")
 		}
 	})
 }

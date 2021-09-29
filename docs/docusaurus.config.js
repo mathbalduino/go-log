@@ -6,13 +6,14 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 (module.exports = {
   title: 'go-log',
   tagline: 'everywhere, under @mathbalduino',
-  url: 'https://your-docusaurus-test-site.com',
-  baseUrl: '/',
+  url: 'https://mathbalduino.github.io/go-log',
+  baseUrl: '/go-log',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
   organizationName: 'mathbalduino', // Usually your GitHub org/user name.
-  projectName: 'docusaurus', // Usually your repo name.
+  projectName: 'go-log', // Usually your repo name.
+  trailingSlash: false,
 
   presets: [
     [
@@ -22,13 +23,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           // Please change this to your repo.
-          editUrl: 'https://github.com/facebook/docusaurus/edit/main/website/',
-        },
-        blog: {
-          showReadingTime: true,
-          // Please change this to your repo.
-          editUrl:
-            'https://github.com/facebook/docusaurus/edit/main/website/blog/',
+          editUrl: 'https://github.com/mathbalduino/go-log/edit/main/docs/',
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
@@ -43,8 +38,8 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
       navbar: {
         title: 'go-log',
         logo: {
-          alt: 'My Site Logo',
-          src: 'img/matheus_balduino.png',
+          alt: '@mathbalduino logo',
+          src: 'img/mathbalduino_logo.png',
         },
         items: [
           {
@@ -59,7 +54,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
             label: 'About',
           },
           {
-            href: 'https://github.com/facebook/docusaurus',
+            href: 'https://github.com/mathbalduino/go-log',
             label: 'GitHub',
             position: 'right',
           },
@@ -77,7 +72,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
               },
               {
                 label: 'Basics',
-                to: '/docs/basic-concepts/log-fields',
+                to: '/docs/basic-concepts/log_fields',
               },
               {
                 label: 'Advanced',

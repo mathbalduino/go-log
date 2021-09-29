@@ -9,7 +9,7 @@ import (
 )
 
 func TestLogger_Outputs(t *testing.T) {
-	t.Run("Should return a new equal instance of logger", func(t *testing.T) {
+	t.Run("Should return a new equal instance of src", func(t *testing.T) {
 		l := &Logger{}
 		newLog := l.Outputs(nil)
 		if reflect.ValueOf(l).Pointer() == reflect.ValueOf(newLog).Pointer() {
@@ -92,10 +92,10 @@ func TestLogger_Outputs(t *testing.T) {
 			reflect.ValueOf(newLog.outputs[2]).Pointer() != reflect.ValueOf(fnC).Pointer() ||
 			reflect.ValueOf(newLog.outputs[3]).Pointer() != reflect.ValueOf(fnD).Pointer() ||
 			reflect.ValueOf(newLog.outputs[4]).Pointer() != reflect.ValueOf(fnE).Pointer() {
-			t.Fatalf("Expected the merge of the logger outputs + argument")
+			t.Fatalf("Expected the merge of the src outputs + argument")
 		}
 	})
-	t.Run("Merge the given Outputs with the logger outputs", func(t *testing.T) {
+	t.Run("Merge the given Outputs with the src outputs", func(t *testing.T) {
 		fnA := func(lvl uint64, msg string, fields LogFields) {}
 		fnB := func(lvl uint64, msg string, fields LogFields) {}
 		fnC := func(lvl uint64, msg string, fields LogFields) {}
@@ -109,13 +109,13 @@ func TestLogger_Outputs(t *testing.T) {
 			reflect.ValueOf(newLog.outputs[2]).Pointer() != reflect.ValueOf(fnC).Pointer() ||
 			reflect.ValueOf(newLog.outputs[3]).Pointer() != reflect.ValueOf(fnD).Pointer() ||
 			reflect.ValueOf(newLog.outputs[4]).Pointer() != reflect.ValueOf(fnE).Pointer() {
-			t.Fatalf("Expected the merge of the logger outputs + argument")
+			t.Fatalf("Expected the merge of the src outputs + argument")
 		}
 	})
 }
 
 func TestLogger_RawOutputs(t *testing.T) {
-	t.Run("Should return a new equal instance of logger", func(t *testing.T) {
+	t.Run("Should return a new equal instance of src", func(t *testing.T) {
 		l := &Logger{}
 		newLog := l.RawOutputs(nil)
 		if reflect.ValueOf(l).Pointer() == reflect.ValueOf(newLog).Pointer() {
@@ -180,7 +180,7 @@ func TestLogger_RawOutputs(t *testing.T) {
 		l := &Logger{outputs: []Output{fnA, fnB, fnC}}
 		newLog := l.RawOutputs(nil, nil, nil, nil)
 		if len(newLog.outputs) != 0 {
-			t.Fatalf("Expected set the logger outputs to an empty slice")
+			t.Fatalf("Expected set the src outputs to an empty slice")
 		}
 	})
 	t.Run("Should ignore the nil outputs", func(t *testing.T) {
@@ -194,10 +194,10 @@ func TestLogger_RawOutputs(t *testing.T) {
 		if len(newLog.outputs) != 2 ||
 			reflect.ValueOf(newLog.outputs[0]).Pointer() != reflect.ValueOf(fnD).Pointer() ||
 			reflect.ValueOf(newLog.outputs[1]).Pointer() != reflect.ValueOf(fnE).Pointer() {
-			t.Fatalf("Expected set the logger outputs to the given argument")
+			t.Fatalf("Expected set the src outputs to the given argument")
 		}
 	})
-	t.Run("Set the given Outputs to the logger outputs", func(t *testing.T) {
+	t.Run("Set the given Outputs to the src outputs", func(t *testing.T) {
 		fnA := func(lvl uint64, msg string, fields LogFields) {}
 		fnB := func(lvl uint64, msg string, fields LogFields) {}
 		fnC := func(lvl uint64, msg string, fields LogFields) {}
@@ -208,7 +208,7 @@ func TestLogger_RawOutputs(t *testing.T) {
 		if len(newLog.outputs) != 2 ||
 			reflect.ValueOf(newLog.outputs[0]).Pointer() != reflect.ValueOf(fnD).Pointer() ||
 			reflect.ValueOf(newLog.outputs[1]).Pointer() != reflect.ValueOf(fnE).Pointer() {
-			t.Fatalf("Expected to set the logger outputs to the given arguments")
+			t.Fatalf("Expected to set the src outputs to the given arguments")
 		}
 	})
 }

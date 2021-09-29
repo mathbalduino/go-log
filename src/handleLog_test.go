@@ -72,14 +72,14 @@ func TestLog_Field(t *testing.T) {
 		}
 		v := l.Field("a")
 		if v.(string) != "ddd" {
-			t.Fatalf("Expected to get the value from the logger fields")
+			t.Fatalf("Expected to get the value from the src fields")
 		}
 	})
 }
 
 // Since it will call "handleLog", it needs to lock the read mutex
 func TestHandleLog(t *testing.T) {
-	t.Run("Should clone the logger fields into another map, adding the 'lvl' and 'msg' keys", raceFreeTest(func(t *testing.T) {
+	t.Run("Should clone the src fields into another map, adding the 'lvl' and 'msg' keys", raceFreeTest(func(t *testing.T) {
 		c := DefaultConfig()
 		expectedFields := LogFields{"a": "aaa", "b": "bbb", "c": "ccc", c.LvlFieldName: uint64(0), c.MsgFieldName: "my msg"}
 		calls := 0

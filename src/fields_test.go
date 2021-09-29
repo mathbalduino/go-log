@@ -31,7 +31,7 @@ func TestField(t *testing.T) {
 }
 
 func TestFields(t *testing.T) {
-	t.Run("Should return a new equal instance of logger", func(t *testing.T) {
+	t.Run("Should return a new equal instance of src", func(t *testing.T) {
 		l := &Logger{}
 		newLog := l.Fields(nil)
 		if reflect.ValueOf(l).Pointer() == reflect.ValueOf(newLog).Pointer() {
@@ -100,19 +100,19 @@ func TestFields(t *testing.T) {
 			}
 		}
 	})
-	t.Run("Merge the given LogFields with the logger fields, overriding duplicates", func(t *testing.T) {
+	t.Run("Merge the given LogFields with the src fields, overriding duplicates", func(t *testing.T) {
 		fields := LogFields{"a": "AAA", "d": "ddd", "e": "eee"}
 		l := &Logger{fields: LogFields{"a": "aaa", "b": "bbb", "c": "ccc"}}
 		newLog := l.Fields(fields)
 		if newLog.fields["a"] != "AAA" || newLog.fields["b"] != "bbb" || newLog.fields["c"] != "ccc" ||
 			newLog.fields["d"] != "ddd" || newLog.fields["e"] != "eee" {
-			t.Fatalf("Expected the merge of the logger fields + argument")
+			t.Fatalf("Expected the merge of the src fields + argument")
 		}
 	})
 }
 
 func TestRawFields(t *testing.T) {
-	t.Run("Should return a new equal instance of logger", func(t *testing.T) {
+	t.Run("Should return a new equal instance of src", func(t *testing.T) {
 		l := &Logger{}
 		newLog := l.RawFields(nil)
 		if reflect.ValueOf(l).Pointer() == reflect.ValueOf(newLog).Pointer() {
@@ -179,7 +179,7 @@ func TestRawFields(t *testing.T) {
 		l := &Logger{fields: LogFields{"a": "aaa", "b": "bbb", "c": "ccc"}}
 		newLog := l.RawFields(fields)
 		if len(newLog.fields) != 3 || newLog.fields["a"] != "AAA" || newLog.fields["d"] != "ddd" || newLog.fields["e"] != "eee" {
-			t.Fatalf("Expected to override the value of the logger fields completelly")
+			t.Fatalf("Expected to override the value of the src fields completelly")
 		}
 	})
 }

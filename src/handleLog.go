@@ -58,7 +58,7 @@ func (l Log) Field(key string) interface{} {
 // handleLog will compile all the log fields and call
 // the registered output functions.
 //
-// The logger fields will be overridden by pre fields,
+// The src fields will be overridden by pre fields,
 // that will be overridden by adHoc fields and latter by
 // post fields
 //

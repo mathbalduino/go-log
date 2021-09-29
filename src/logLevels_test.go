@@ -66,7 +66,7 @@ func TestLog(t *testing.T) {
 			t.Fatalf("Expected to create a log with the correct msg")
 		}
 		if reflect.ValueOf(receivedLog.logger).Pointer() != reflect.ValueOf(l).Pointer() {
-			t.Fatalf("Expected to create a log that points to the correct logger")
+			t.Fatalf("Expected to create a log that points to the correct src")
 		}
 		if !reflect.DeepEqual(receivedLog.preFields, LogFields{"i": "iii", "j": "jjj", "k": "kkk"}) {
 			t.Fatalf("Expected to create a log with the correct pre fields")
@@ -103,7 +103,7 @@ func TestLog(t *testing.T) {
 				t.Fatalf("Expected to create a log with the correct msg")
 			}
 			if reflect.ValueOf(receivedLog.logger).Pointer() != reflect.ValueOf(l).Pointer() {
-				t.Fatalf("Expected to create a log that points to the correct logger")
+				t.Fatalf("Expected to create a log that points to the correct src")
 			}
 			if !reflect.DeepEqual(receivedLog.preFields, LogFields{"i": "iii", "j": "jjj", "k": "kkk"}) {
 				t.Fatalf("Expected to create a log with the correct pre fields")
