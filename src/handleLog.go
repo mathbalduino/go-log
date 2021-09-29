@@ -1,4 +1,4 @@
-package logger
+package src
 
 // Log is a struct that represents
 // a newly created log
@@ -12,7 +12,7 @@ type Log struct {
 	logger      *Logger
 	preFields   LogFields
 	adHocFields []LogFields
-	postFields   LogFields
+	postFields  LogFields
 }
 
 // Field will return the value associated with the

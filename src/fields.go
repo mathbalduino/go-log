@@ -1,4 +1,4 @@
-package logger
+package src
 
 // LogFields is just an alias to a map that
 // represents the fields of the log

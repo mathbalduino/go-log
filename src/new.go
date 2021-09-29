@@ -1,4 +1,4 @@
-package logger
+package src
 
 // Logger is a struct that represents
 // a base log template, that contains

@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	logger "gitlab.com/loxe-tools/go-log"
+	"go-log/src"
 	"os"
 	"sort"
 	"strconv"
@@ -111,9 +111,9 @@ func drawLogTree(tree []ABC, treeDepth int) string {
 			prefix = strings.Repeat("   ", treeDepth-1)
 
 			if isLast {
-				prefix += logger.ColorizeStrByLvl(log.parentPtr.Lvl, "'--")
+				prefix += src.ColorizeStrByLvl(log.parentPtr.Lvl, "'--")
 			} else {
-				prefix += logger.ColorizeStrByLvl(log.parentPtr.Lvl, "|--")
+				prefix += src.ColorizeStrByLvl(log.parentPtr.Lvl, "|--")
 			}
 		}
 
@@ -122,7 +122,7 @@ func drawLogTree(tree []ABC, treeDepth int) string {
 			c = strings.TrimSuffix(c, "   ") + "x  "
 		}
 		if len(log.childs) > 0 {
-			c += logger.ColorizeStrByLvl(log.Lvl, "|  ")
+			c += src.ColorizeStrByLvl(log.Lvl, "|  ")
 		} else {
 			c += "   "
 		}
@@ -136,20 +136,20 @@ func drawLogTree(tree []ABC, treeDepth int) string {
 		}
 		msgSlice := strings.Split(s, "\n")
 		for i, m := range msgSlice {
-			msgSlice[i] = logger.ColorizeStrByLvl(log.Lvl, m)
+			msgSlice[i] = src.ColorizeStrByLvl(log.Lvl, m)
 		}
 		msg := strings.Join(msgSlice, "\n" + c)
 
 		str += fmt.Sprintf(
-			prefix+logger.ColorizeStrByLvl(log.Lvl, "[ %s ] %s")+"\n",
-			logger.LvlToString(log.Lvl),
+			prefix+src.ColorizeStrByLvl(log.Lvl, "[ %s ] %s")+"\n",
+			src.LvlToString(log.Lvl),
 			msg)
 		nestedStrs := drawLogTree(log.childs, treeDepth+1)
 		if len(log.childs) > 1 {
 			nestedStrs = strings.ReplaceAll(
 				nestedStrs,
 				"\n"+strings.Repeat("   ", treeDepth)+" ",
-				"\n"+strings.Repeat("   ", treeDepth)+logger.ColorizeStrByLvl(log.Lvl, "|"))
+				"\n"+strings.Repeat("   ", treeDepth)+src.ColorizeStrByLvl(log.Lvl, "|"))
 		}
 		if len(log.childs) > 0 {
 			nestedStrs = strings.ReplaceAll(nestedStrs, "x  ", "   ")

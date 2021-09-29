@@ -1,4 +1,4 @@
-package logger
+package src
 
 // The ANSI codes used to change the terminal color
 const (
