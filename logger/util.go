@@ -1,4 +1,4 @@
-package src
+package logger
 
 // LvlToString will take the given log level and
 // return the string that represents it

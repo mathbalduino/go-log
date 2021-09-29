@@ -1,4 +1,4 @@
-package src
+package logger
 
 // Trace will create a new default log with the Trace level, using the
 // given adHocFields, if enabled.

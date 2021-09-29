@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"go-log/src"
+	"github.com/mathbalduino/go-log/src"
 	"os"
 	"sort"
 	"strconv"
@@ -111,9 +111,9 @@ func drawLogTree(tree []ABC, treeDepth int) string {
 			prefix = strings.Repeat("   ", treeDepth-1)
 
 			if isLast {
-				prefix += src.ColorizeStrByLvl(log.parentPtr.Lvl, "'--")
+				prefix += logger.ColorizeStrByLvl(log.parentPtr.Lvl, "'--")
 			} else {
-				prefix += src.ColorizeStrByLvl(log.parentPtr.Lvl, "|--")
+				prefix += logger.ColorizeStrByLvl(log.parentPtr.Lvl, "|--")
 			}
 		}
 
@@ -122,7 +122,7 @@ func drawLogTree(tree []ABC, treeDepth int) string {
 			c = strings.TrimSuffix(c, "   ") + "x  "
 		}
 		if len(log.childs) > 0 {
-			c += src.ColorizeStrByLvl(log.Lvl, "|  ")
+			c += logger.ColorizeStrByLvl(log.Lvl, "|  ")
 		} else {
 			c += "   "
 		}
@@ -136,20 +136,20 @@ func drawLogTree(tree []ABC, treeDepth int) string {
 		}
 		msgSlice := strings.Split(s, "\n")
 		for i, m := range msgSlice {
-			msgSlice[i] = src.ColorizeStrByLvl(log.Lvl, m)
+			msgSlice[i] = logger.ColorizeStrByLvl(log.Lvl, m)
 		}
 		msg := strings.Join(msgSlice, "\n" + c)
 
 		str += fmt.Sprintf(
-			prefix+src.ColorizeStrByLvl(log.Lvl, "[ %s ] %s")+"\n",
-			src.LvlToString(log.Lvl),
+			prefix+logger.ColorizeStrByLvl(log.Lvl, "[ %s ] %s")+"\n",
+			logger.LvlToString(log.Lvl),
 			msg)
 		nestedStrs := drawLogTree(log.childs, treeDepth+1)
 		if len(log.childs) > 1 {
 			nestedStrs = strings.ReplaceAll(
 				nestedStrs,
 				"\n"+strings.Repeat("   ", treeDepth)+" ",
-				"\n"+strings.Repeat("   ", treeDepth)+src.ColorizeStrByLvl(log.Lvl, "|"))
+				"\n"+strings.Repeat("   ", treeDepth)+logger.ColorizeStrByLvl(log.Lvl, "|"))
 		}
 		if len(log.childs) > 0 {
 			nestedStrs = strings.ReplaceAll(nestedStrs, "x  ", "   ")
