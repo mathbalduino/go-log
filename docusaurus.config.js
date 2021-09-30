@@ -7,7 +7,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
   title: 'go-log',
   tagline: 'everywhere, under @mathbalduino',
   url: 'https://mathbalduino.github.io/go-log',
-  baseUrl: '/go-log',
+  baseUrl: '/go-log/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
@@ -39,7 +39,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
         title: 'go-log',
         logo: {
           alt: '@mathbalduino logo',
-          src: 'img/mathbalduino_logo.png',
+          src: 'img/mathbalduino_logoM.png',
         },
         items: [
           {
@@ -90,6 +90,12 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
             ],
           },
         ],
+        logo: {
+          alt: '@mathbalduino logo',
+          href: 'http://mathbalduino.com.br',
+          src: 'img/mathbalduino_logoS.png'
+        },
+        copyright: '@mathbalduino (Built with Docusaurus)',
       },
       prism: {
         theme: lightCodeTheme,
