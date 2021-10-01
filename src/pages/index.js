@@ -21,10 +21,8 @@ function HomepageHeader() {
 }
 
 export default function Home() {
-  const {siteConfig} = useDocusaurusContext();
   return (
     <Layout
-      title={siteConfig.title}
       description="go-log library online documentation">
       <HomepageHeader />
       <main>
