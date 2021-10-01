@@ -10,7 +10,13 @@ It was created, at first, to be used in `webservers` and `CLI` tools. ~~But feel
 
 ## Getting Started
 
-The library is built around the `Logger` struct type, that contains all the principal methods:
+You will need to install `go-log` before starting. To do it, execute the following command:
+
+```sh
+go get github.com/mathbalduino/go-log
+```
+
+The library is built around the `Logger` struct type, that contains all the main methods:
 
 ```go
 // new.go

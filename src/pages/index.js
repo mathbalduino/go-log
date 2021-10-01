@@ -7,9 +7,12 @@ import styles from './index.module.css';
 
 function HomepageHeader() {
   const {siteConfig} = useDocusaurusContext();
+  const mathbalduino_logoM = require('../../static/img/mathbalduino_logoM.png').default
+
   return (
     <header className={clsx('hero hero--primary', styles.heroBanner)}>
       <div className="container">
+        <img src={mathbalduino_logoM} />
         <h1 className="hero__title">{siteConfig.title}</h1>
         <p className="hero__subtitle">{siteConfig.tagline}</p>
       </div>
@@ -25,7 +28,7 @@ export default function Home() {
       description="Description will go into a meta tag in <head />">
       <HomepageHeader />
       <main>
-        AASDASd
+        <HomepageFeatures />
       </main>
     </Layout>
   );

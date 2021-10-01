@@ -20,7 +20,7 @@ some-tool --json --some-flag some-file | go run PATH/TO/go-log/loggerCLI/beautif
 The `beautify` package expects to receive one log per line, parsed as a JSON object. Just remember to create and set a `--json` flag, forwarding it to the `New` function that creates the `LoggerCLI` instance.
 :::
 
-This package is far from optimized, and expects that the output knows how to print ANSI codes (virtually any modern terminal knows how to do it). For details, see the [source code](LINK).
+This package is far from optimized, and expects that the output knows how to print ANSI codes (virtually any modern terminal knows how to do it). For details, see the [source code](https://github.com/mathbalduino/go-log).
 
 ## Creating a new LoggerCLI instance
 

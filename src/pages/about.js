@@ -26,7 +26,7 @@ function Hello() {
           <p className="hero__subtitle" style={{ marginBottom: 0 }}>
             Hey, be welcome! I'm <b>Matheus Leonel Balduino</b>, an independent brazilian
             developer that likes to create and publish open-source libraries, personal 
-            projects, programming tips, tutorials, etc
+            projects, etc
           </p>
         </div>
       </div>
@@ -38,9 +38,8 @@ function Hello() {
                 title='Where?' 
                 description={
                   <p>
-                    Currently, I'm working from <b>Florianópolis</b>, Santa Catarina (Brasil). What a beautiful city, don't you think?
-                    <br />
-                    Feel free to send me a message if I can help you with something
+                    Currently, I'm working from <b>Florianópolis</b>, Santa Catarina (Brasil).
+                    What a beautiful city, don't you think?
                   </p>
                 } 
                 header={
@@ -57,7 +56,7 @@ function Hello() {
                 description={
                   <p>
                     Computer Science at <a href="https://ufsc.br" style={{height: 300}} target="_blank">UFSC</a>,
-                    that's what I'm doing. I'm almost finishing my graduation (if nothing goes wrong), but if 
+                    that's it. I'm almost finishing my graduation (if nothing goes wrong), but if
                     you're having trouble finding me, the UFSC is a good starting point
                   </p>
                 } 
@@ -71,11 +70,12 @@ function Hello() {
                   <ul style={{listStyle: 'none', paddingLeft: 0}}>
                     <li><a href="https://github.com/mathbalduino" target="_blank">@mathbalduino</a> on GitHub</li>
                     <li><a href="https://instagram.com/mathbalduino" target="_blank">@mathbalduino</a> on Instagram</li>
-                    <li><a href="https://twitter.com/mathbalduino" target="_blank">@mathbalduino</a> on Twitter</li>
-                    <li><a href="https://youtube.com/c/mathbalduino" target="_blank">@mathbalduino</a> on YouTube</li>
-                    <li><a href="https://www.twitch.tv/mathbalduino" target="_blank">@mathbalduino</a> on Twitch</li>
-                    <li><a href="https://www.tiktok.com/@mathbalduino" target="_blank">@mathbalduino</a> on TikTok</li>
-                    <li>...</li>
+
+                    {/*<li><a href="https://twitter.com/mathbalduino" target="_blank">@mathbalduino</a> on Twitter</li>*/}
+                    {/*<li><a href="https://youtube.com/c/mathbalduino" target="_blank">@mathbalduino</a> on YouTube</li>*/}
+                    {/*<li><a href="https://www.twitch.tv/mathbalduino" target="_blank">@mathbalduino</a> on Twitch</li>*/}
+                    {/*<li><a href="https://www.tiktok.com/@mathbalduino" target="_blank">@mathbalduino</a> on TikTok</li>*/}
+                    <li>... everywhere, under @mathbalduino ...</li>
                   </ul>
                 } 
                 header={
