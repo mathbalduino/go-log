@@ -7,7 +7,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
   title: 'go-log',
   tagline: 'everywhere, under @mathbalduino',
   url: 'https://mathbalduino.com.br',
-  baseUrl: '/',
+  baseUrl: '/go-log/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
