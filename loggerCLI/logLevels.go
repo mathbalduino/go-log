@@ -1,8 +1,6 @@
 package loggerCLI
 
-import (
-	"github.com/mathbalduino/go-log/src"
-)
+import "github.com/mathbalduino/go-log"
 
 func (l *LoggerCLI) Trace(msg string, adHocFields ...logger.LogFields) *LoggerCLI {
 	baseLogger := nestLogger(l)

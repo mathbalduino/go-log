@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"github.com/mathbalduino/go-log/src"
+	"github.com/mathbalduino/go-log"
 	"os"
 	"sort"
 	"strconv"
