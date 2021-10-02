@@ -13,4 +13,4 @@ if e == logger.ErrNilWaitGroup {
 }
 ```
 
-You will find all the error tokens inside the `errors.go` file, under the root package.
+You will find all the error tokens inside the [errors.go](https://github.com/mathbalduino/go-log/blob/main/errors.go) file, under the root package.

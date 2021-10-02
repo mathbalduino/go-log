@@ -118,7 +118,7 @@ It's impossible to query `PreHooks`, `AdHoc fields` or `PostHooks` directly from
 :::
 
 :::tip
-You can use this method to create more complex rules when cloning `Loggers`. See the implementation of [LoggerCLI](https://github.com/mathbalduino/go-log) for a concrete example.
+You can use this method to create more complex rules when cloning `Loggers`. See the implementation of [LoggerCLI](https://github.com/mathbalduino/go-log/blob/79263810d94dd1f2d112727824d1c5256b27951b/loggerCLI/nestLogger.go#L12) for a concrete example.
 :::
 
 

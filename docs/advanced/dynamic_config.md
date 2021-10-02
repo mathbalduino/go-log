@@ -21,4 +21,4 @@ If you needs to change more than one thing, it is, naturally, not atomic. The li
 3. New `LvlFieldName` value with the old `MsgFieldName` value (some log was being created at the same time of the `Logger.Configuration()` call)
 4. New `LvlFieldName` and `MsgFieldName` values (`Logger.Configuration()` call completed)
 
-There's a plan to implement some blocking `Logger.Configuration()` method variation, that solves this issue, in the future. Please, let me know if it's necessary.
+There's a plan to implement some blocking `Logger.Configuration()` method variation, that solves this issue, in the future. Please, [let me know](https://github.com/mathbalduino/go-log/issues) if it's necessary.

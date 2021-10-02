@@ -20,7 +20,7 @@ some-tool --json --some-flag some-file | go run PATH/TO/go-log/loggerCLI/beautif
 The `beautify` package expects to receive one log per line, parsed as a JSON object. Just remember to create and set a `--json` flag, forwarding it to the `New` function that creates the `LoggerCLI` instance.
 :::
 
-This package is far from optimized, and expects that the output knows how to print ANSI codes (virtually any modern terminal knows how to do it). For details, see the [source code](https://github.com/mathbalduino/go-log).
+This package is far from optimized, and expects that the output knows how to print ANSI codes (virtually any modern terminal knows how to do it). For details, see the [source code](https://github.com/mathbalduino/go-log/tree/main/loggerCLI).
 
 ## Creating a new LoggerCLI instance
 
@@ -35,7 +35,7 @@ Using the `New` function, at the package `loggerCLI`, you can get a new `LoggerC
 Logs created by the `LoggerCLI` are intended to be nested, so, the API is built in a way that makes it possible. Every log level method will return another instance of `LoggerCLI`, that will nest it's own logs inside the `LoggerCLI` that created it. Example:
 
 ```go
-flags := cliFlags()
+flags := parseCliFlags()
 lvl0 := loggerCLI.New(flags.json, flags.debug, flags.trace)
 lvl1 := lvl0.Info("Lvl 0")
 lvl2 := lvl1.Warn("Lvl 1")

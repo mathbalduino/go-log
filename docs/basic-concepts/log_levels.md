@@ -203,4 +203,4 @@ func (l *NewLogger) Error(msg string, adHocFields ...logger.LogFields) {
 
 This way, there will be only two methods in the new custom `Logger` api: `Info` and `Error`.
 
-You can see a more concrete example by looking at the `LoggerCLI` [source-code](../advanced/logger_cli.md).
+You can see a more concrete example by looking at the `LoggerCLI`, [here](https://github.com/mathbalduino/go-log/blob/main/loggerCLI/logLevels.go) and [here](https://github.com/mathbalduino/go-log/blob/79263810d94dd1f2d112727824d1c5256b27951b/loggerCLI/new.go#L9).
