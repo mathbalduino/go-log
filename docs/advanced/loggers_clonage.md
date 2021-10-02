@@ -38,16 +38,16 @@ clone := someLogger.RawPreHooks(nil)
 // Now, both "someLogger" and "clone" have a field
 // called "pointer" that points to "myInt", but in
 // different maps
-someLogger.Field("pointer").(*int) // 10
-clone.Field("pointer").(*int)      // 10
+fmt.Println(*someLogger.Field("pointer").(*int)) // 10
+fmt.Println(*clone.Field("pointer").(*int))      // 10
 
-someLogger.Fields(logger.LogFields{"pointer": 5})
-someLogger.Field("pointer").(int) // 5
-clone.Field("pointer").(*int)     // 10
+otherLogger := someLogger.Fields(logger.LogFields{"pointer": 5})
+fmt.Println(otherLogger.Field("pointer").(int)) // 5
+fmt.Println(*clone.Field("pointer").(*int))     // 10
 ```
 
 :::info
 The `Configuration` pointer is just copied to the new `Logger`, without changing it, so all the following versions of some `Logger` will share the same `Configuration`. This way, you can configure your logging strategy in a more centralized way.
 
-If you still want new `Loggers` to point to a different `Configuration`, you can just create another one using `logger.New()`/`logger.NewDefault()`
+If you still want new `Loggers` to point to a different `Configuration`, you can just create another instance using `logger.New()`/`logger.NewDefault()`
 :::

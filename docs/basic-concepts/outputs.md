@@ -76,11 +76,11 @@ This is, in fact, a function that will return another function. Note that if you
 ```go
 // compiler error
 logger.NewDefault().
-  Outputs(OutputToWriter)
+  Outputs(logger.OutputToWriter)
 
 // ok
 logger.NewDefault().
-  Outputs(OutputToWriter(w, p, func(error) {}))
+  Outputs(logger.OutputToWriter(w, p, func(error) {}))
 ```
 
 ### OutputJsonToWriter

@@ -29,7 +29,7 @@ Read the introduction in the [PreHooks](pre_hooks.md) page for details.
 The advantage of `PostHooks` is that since they're being applied **after** the `Base fields`, `PreHooks` and `AdHoc fields`, you can query more fields using the `Log.Field` method from the hook argument:
 
 ```go
-someLogger := logger.NewDefault().
+someLogger := logger.New(logger.DefaultConfig()).
   Fields(logger.LogFields{
     "base-field": 10,
   }).
@@ -43,7 +43,8 @@ someLogger := logger.NewDefault().
       // Querying the adHoc field that will be defined at log creation time
       return l.Field("preHook").(int) + l.Field("adHoc-field").(int)
     },
-  })
+  }).
+  Outputs(logger.OutputJsonToWriter(os.Stdout, nil))
 someLogger.Debug("some log", logger.LogFields{
   "adHoc-field": 5,
 })
@@ -64,17 +65,18 @@ someLogger.Debug("some log", logger.LogFields{
 Similar to the [PreHooks method](pre_hooks.md#prehooks-method), this method will return a new copy of the `Logger` instance with the given `PostHooks` applied, overriding previous `PostHooks` with the same `key`:
 
 ```go
-firstLogger := logger.NewDefault().
+firstLogger := logger.New(logger.DefaultConfig()).
   PostHooks(logger.Hooks{
     "field-A": func(_ logger.Log) interface{} { return "dynamic value-A" },
     "field-B": func(_ logger.Log) interface{} { return "dynamic value-B" },
     "field-C": func(_ logger.Log) interface{} { return "dynamic value-C" },
-  })
-firstLogger.Trace("first log")
+  }).
+  Outputs(logger.OutputJsonToWriter(os.Stdout, nil))
+firstLogger.Info("first log")
 /*
   {
     "msg": "first log",
-    "lvl": 1,
+    "lvl": 4,
     "field-A": "dynamic value-A",
     "field-B": "dynamic value-B",
     "field-C": "dynamic value-C"
@@ -102,17 +104,18 @@ secondLogger.Info("second log")
 If you want to reset the `Logger` `PostHooks` you can use the `RawPostHooks` method, that will set the `Logger` `PostHooks` right away, ignoring any previous values (returning a new copy of the `Logger` instance, just like `PostHooks`). Example:
 
 ```go
-firstLogger := logger.NewDefault().
+firstLogger := logger.New(logger.DefaultConfig()).
   PostHooks(logger.Hooks{
     "field-A": func(_ logger.Log) interface{} { return "dynamic value-A" },
     "field-B": func(_ logger.Log) interface{} { return "dynamic value-B" },
     "field-C": func(_ logger.Log) interface{} { return "dynamic value-C" },
-  })
-firstLogger.Trace("first log")
+  }).
+  Outputs(logger.OutputJsonToWriter(os.Stdout, nil))
+firstLogger.Info("first log")
 /*
   {
     "msg": "first log",
-    "lvl": 1,
+    "lvl": 4,
     "field-A": "dynamic value-A",
     "field-B": "dynamic value-B",
     "field-C": "dynamic value-C"

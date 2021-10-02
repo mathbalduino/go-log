@@ -16,7 +16,7 @@ Everything starts at the `Base fields`, go through `PreHooks`, `AdHoc fields` an
 It means that if you define some field using the `Fields` method, it will be overriden by fields defined by the `PreHooks` method, if they have the same key. Example:
 
 ```go
-someLogger := logger.NewDefault().
+someLogger := logger.New(logger.DefaultConfig()).
   Fields(logger.LogFields{
     "lvl": "Trying to override the 'lvl' field",
     "msg": "Trying to override the 'msg' field",
@@ -26,21 +26,22 @@ someLogger := logger.NewDefault().
     "postHook": 1,
   }).
   PreHooks(logger.Hooks{
-    "lvl": func(l logger.Log) interface{} { return "Trying to override the 'lvl' field (2)" }
-    "msg": func(l logger.Log) interface{} { return "Trying to override the 'msg' field (2)" }
+    "lvl": func(l logger.Log) interface{} { return "Trying to override the 'lvl' field (2)" },
+    "msg": func(l logger.Log) interface{} { return "Trying to override the 'msg' field (2)" },
     "preHook": func(l logger.Log) interface{} { return 2 },
     "adhoc-field": func(l logger.Log) interface{} { return 2 },
     "postHook": func(l logger.Log) interface{} { return 2 },
   }).
   PostHooks(logger.Hooks{
-    "lvl": func(l logger.Log) interface{} { return "Trying to override the 'lvl' field (4)" }
-    "msg": func(l logger.Log) interface{} { return "Trying to override the 'msg' field (4)" }
+    "lvl": func(l logger.Log) interface{} { return "Trying to override the 'lvl' field (4)" },
+    "msg": func(l logger.Log) interface{} { return "Trying to override the 'msg' field (4)" },
     "postHook": func(l logger.Log) interface{} { return 4 },
-  })
+  }).
+  Outputs(logger.OutputJsonToWriter(os.Stdout, nil))
 someLogger.Debug("some log", logger.LogFields{
   "lvl": "Trying to override the 'lvl' field (3)",
   "msg": "Trying to override the 'msg' field (3)",
-  "adHoc-field": 3,
+  "adhoc-field": 3,
   "postHook": 3,
 })
 /*

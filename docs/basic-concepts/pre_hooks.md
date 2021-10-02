@@ -59,10 +59,12 @@ You have to be very carefull when writing `Hooks`, because the library is not pr
 This method, as the `Fields`/`RawFields`, will return a new copy of the `Logger` instance, with the given `PreHooks` applied. So, lets say you want to timestamp your logs every time they're created, you can create the following `PreHook`:
 
 ```go
-someLogger := logger.NewDefault().
+someLogger := logger.New(logger.DefaultConfig()).
   PreHooks(logger.Hooks{
-    "timestamp": func(_ logger.Log) interface{} { return time.Now().Second() },
-  })
+    "timestamp": func(_ logger.Log) interface{} {
+		  return time.Now().Second() 
+  }}).
+  Outputs(logger.OutputJsonToWriter(os.Stdout, nil))
 someLogger.Debug("some log")
 /*
   {
@@ -76,17 +78,18 @@ someLogger.Debug("some log")
 This method will override any `PreHook` of the previous `Logger` instance with a `key` that clashes with some of the new ones. Example:
 
 ```go
-firstLogger := logger.NewDefault().
+firstLogger := logger.New(logger.DefaultConfig()).
   PreHooks(logger.Hooks{
     "field-A": func(_ logger.Log) interface{} { return "dynamic value-A" },
     "field-B": func(_ logger.Log) interface{} { return "dynamic value-B" },
     "field-C": func(_ logger.Log) interface{} { return "dynamic value-C" },
-  })
-firstLogger.Trace("first log")
+  }).
+  Outputs(logger.OutputJsonToWriter(os.Stdout, nil))
+firstLogger.Info("first log")
 /*
   {
     "msg": "first log",
-    "lvl": 1,
+    "lvl": 4,
     "field-A": "dynamic value-A",
     "field-B": "dynamic value-B",
     "field-C": "dynamic value-C"
@@ -114,17 +117,18 @@ secondLogger.Info("second log")
 If you want to reset the `Logger` `PreHooks` you can use the `RawPreHooks` method, that will set the `Logger` `PreHooks` right away, ignoring any previous values (returning a new copy of the `Logger` instance, just like `PreHooks`). Example:
 
 ```go
-firstLogger := logger.NewDefault().
+firstLogger := logger.New(logger.DefaultConfig()).
   PreHooks(logger.Hooks{
     "field-A": func(_ logger.Log) interface{} { return "dynamic value-A" },
     "field-B": func(_ logger.Log) interface{} { return "dynamic value-B" },
     "field-C": func(_ logger.Log) interface{} { return "dynamic value-C" },
-  })
-firstLogger.Trace("first log")
+  }).
+  Outputs(logger.OutputJsonToWriter(os.Stdout, nil))
+firstLogger.Info("first log")
 /*
   {
     "msg": "first log",
-    "lvl": 1,
+    "lvl": 4,
     "field-A": "dynamic value-A",
     "field-B": "dynamic value-B",
     "field-C": "dynamic value-C"
@@ -161,6 +165,7 @@ someLogger := logger.NewDefault().
       return v.(int) + 5
     },
   })
+
 // when iterating/executing the PreHooks inside the following log creation
-someLogger.Trace("some log")
+someLogger.Info("some log")
 ```

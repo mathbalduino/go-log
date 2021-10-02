@@ -53,25 +53,50 @@ This function will be called from both `ErrorFrom` and `FatalFrom` methods, in o
 Instead of doing something like this:
 
 ```go
-someLogger := logger.NewDefault()
-e := maybeReturnsError()
-if e != nil {
-  err := e.(&SomeErrorStruct)
-  someLogger.Fatal(e.Error(), logger.LogFields{ "errorValue": err.Value })
+type SomeErrorStruct struct{
+  Value int
+}
+func (s *SomeErrorStruct) Error() string { return "error msg" }
+
+func maybeReturnsError() error { return &SomeErrorStruct{Value: 10} }
+
+func main() {
+  someLogger := logger.NewDefault()
+
+  e := maybeReturnsError()
+  if e != nil {
+    err := e.(*SomeErrorStruct)
+    someLogger.Fatal(e.Error(), logger.LogFields{ "errorValue": err.Value })
+  }
 }
 ```
 
 You can do this:
 ```go
-// Set the ErrorParser to:
+type SomeErrorStruct struct{
+  Value int
+}
+func (s *SomeErrorStruct) Error() string { return "error msg" }
+
+func maybeReturnsError() error { return &SomeErrorStruct{Value: 10} }
+
 func MyErrorParser(e error) (string, logger.LogFields) {
-  return e.Error(), logger.LogFields{ "errorValue": e.(*SomeErrorStruct).Value }
+  return e.Error(), logger.LogFields{
+	  "errorValue": e.(*SomeErrorStruct).Value,
+  }
 }
 
-someLogger := logger.NewDefault()
-e := maybeReturnsError()
-if e != nil {
-  someLogger.FatalFrom(e)
+func main() {
+  config := logger.DefaultConfig()
+  config.ErrorParser = MyErrorParser
+  someLogger := logger.New(config).
+    Outputs(logger.OutputJsonToWriter(os.Stdout, nil))
+
+  e := maybeReturnsError()
+  if e != nil {
+    someLogger.FatalFrom(e)
+    // { "errorValue": 10,"lvl": 32, "msg": "error msg" }
+  }
 }
 ```
 
@@ -86,22 +111,27 @@ func MyErrorParser(_ error) (string, logger.LogFields) {
   }
 }
 
-// And you create the following log:
-someLogger.ErrorFrom(someErrInterface, logger.LogFields{ 
-  "someKey": "newValue", 
-  "thirtyKey": "another another value",
-})
+func main() {
+  config := logger.DefaultConfig()
+  config.ErrorParser = MyErrorParser
+  someLogger := logger.New(config).
+    Outputs(logger.OutputJsonToWriter(os.Stdout, nil))
 
-/*
-  The following log will be created:
-  {
-    "msg": "some example error msg",
-    "lvl": 16,
-    "someKey": "newValue", 
-    "anotherKey": "another value",
-    "thirtyKey": "another another value"
-  }
-*/
+  // And you create the following log:
+  someLogger.ErrorFrom(fmt.Errorf("any error"), logger.LogFields{
+    "someKey": "newValue",
+    "thirtyKey": "another another value",
+  })
+  /*
+    {
+      "msg": "some example error msg",
+      "lvl": 16,
+      "someKey": "newValue",
+      "anotherKey": "another value",
+      "thirtyKey": "another another value"
+    }
+  */
+}
 ```
 
 ### Default ErrorParser

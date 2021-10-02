@@ -30,17 +30,18 @@ func (l *Logger) Field(key string) interface{} { ... }
 This method will return a new copy of the `Logger` instance, with the given `LogFields` applied. Note that if the previous `Logger` had a `Base Field` with a key that clashes with one of the new ones, it will be overriden:
 
 ```go
-firstLogger := logger.NewDefault().
+firstLogger := logger.New(logger.DefaultConfig()).
   Fields(logger.LogFields{
     "field-A": "value-A",
     "field-B": "value-B",
     "field-C": "value-C",
-  })
-firstLogger.Trace("first log")
+  }).
+  Outputs(logger.OutputJsonToWriter(os.Stdout, nil))
+firstLogger.Info("first log")
 /*
   {
     "msg": "first log",
-    "lvl": 1,
+    "lvl": 4,
     "field-A": "value-A",
     "field-B": "value-B",
     "field-C": "value-C"
@@ -68,17 +69,18 @@ secondLogger.Info("second log")
 This method is almost equal to the previous one (returns a new copy of the `Logger` instance too), with one difference: the given `LogFields` will be set right away, ignoring any previous `Base Fields`.
 
 ```go
-firstLogger := logger.NewDefault().
+firstLogger := logger.New(logger.DefaultConfig()).
   Fields(logger.LogFields{
     "field-A": "value-A",
     "field-B": "value-B",
     "field-C": "value-C",
-  })
-firstLogger.Trace("first log")
+  }).
+  Outputs(logger.OutputJsonToWriter(os.Stdout, nil))
+firstLogger.Info("first log")
 /*
   {
     "msg": "first log",
-    "lvl": 1,
+    "lvl": 4,
     "field-A": "value-A",
     "field-B": "value-B",
     "field-C": "value-C"
