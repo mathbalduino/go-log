@@ -24,46 +24,46 @@ func main() {
 
 const baseFieldsCode = `package main
 
-import "github.com/mathbalduino/go-log"
+import (
+	"github.com/mathbalduino/go-log"
+	"os"
+)
 
 func main() {
   // Outputs to stdout
-  userLogger := logger.NewDefault().
-    Fields(logger.LogFields{"module": "user"})
+  userLogger := logger.New(logger.DefaultConfig()).
+    Fields(logger.LogFields{"module": "user"}).
+    Outputs(logger.OutputJsonToWriter(os.Stdout, nil))
 
   userLogger.Info("New log")
-  // logger.LogFields{
-  //   "msg": "New log",
-  //   "lvl": 4,
-  //   "module": "user",
-  // }
+  // { "lvl": 4, "module": "user", "msg": "New log" }
 }
 `
 
 const dynamicFieldsCode = `package main
 
 import (
-  "time"
   "github.com/mathbalduino/go-log"
+  "os"
+  "time"
 )
 
 func main() {
   // Outputs to stdout
-  userLogger := logger.NewDefault().
+  userLogger := logger.New(logger.DefaultConfig()).
     Fields(logger.LogFields{"module": "user"}).
-    PreHooks(logger.Hooks{"timestamp": func(Log) interface{} {
-      return time.Now().UnixNano()
-    }}
+    PreHooks(logger.Hooks{
+      "timestamp": func(logger.Log) interface{} {
+        return time.Now().UnixNano()
+      },
+    }).
+    Outputs(logger.OutputJsonToWriter(os.Stdout, nil))
 
   userLogger.Info("New log", logger.LogFields{"id": 98})
-  // logger.LogFields{
-  //   "msg": "New log",
-  //   "lvl": 4,
-  //   "module": "user",
-  //   "timestamp": 1234567890,
-  //   "id": 98,
-  // }
+  // { "id": 98, "lvl": 4, "module": "user", 
+  //    "msg": "New log", "timestamp": 1633182921043120309 }
 }
+
 `
 
 const outputCode = `package main
