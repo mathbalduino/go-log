@@ -1,4 +1,5 @@
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
+import Link from '@docusaurus/Link';
 import Layout from '@theme/Layout';
 import clsx from 'clsx';
 import React from 'react';
@@ -15,6 +16,13 @@ function HomepageHeader() {
         <img src={mathbalduino_logoM} />
         <h1 className="hero__title">{siteConfig.title}</h1>
         <p className="hero__subtitle">{siteConfig.tagline}</p>
+        <div className={styles.buttons}>
+          <Link
+            className="button button--secondary button--lg"
+            to="/docs/intro">
+            Read the Introduction 📜
+          </Link>
+        </div>
       </div>
     </header>
   );
