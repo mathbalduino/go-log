@@ -19,14 +19,13 @@ function Hello() {
   const BrasaoUfsc = require('../../static/img/brasao_ufsc.svg').default
 
   return (
-    <Layout title="Hello">
+    <Layout title="@mathbalduino">
       <div className={clsx('hero hero--primary', styles.heroBanner)}>
         <div className="container">
-          <img style={{ marginBottom: '20px' }} src="https://dummyimage.com/200x200/8c8c8c/000000&text=Foto+perfil"/>
+          <img style={{ marginBottom: 20, borderRadius: 150 }} src="https://dummyimage.com/300x300/8c8c8c/000000&text=Foto+perfil"/>
           <p className="hero__subtitle" style={{ marginBottom: 0 }}>
             Hey, be welcome! I'm <b>Matheus Leonel Balduino</b>, an independent brazilian
-            developer that likes to create and publish open-source libraries, personal 
-            projects, etc
+            developer
           </p>
         </div>
       </div>
@@ -35,7 +34,7 @@ function Hello() {
           <div className="container">
             <div className="row">
               <Item
-                title='Where?' 
+                title='Location'
                 description={
                   <p>
                     Currently, I'm working from <b>Florianópolis</b>, Santa Catarina (Brasil).
@@ -55,9 +54,8 @@ function Hello() {
                 title='Education' 
                 description={
                   <p>
-                    Computer Science at <a href="https://ufsc.br" style={{height: 300}} target="_blank">UFSC</a>,
-                    that's it. I'm almost finishing my graduation (if nothing goes wrong), but if
-                    you're having trouble finding me, the UFSC is a good starting point
+                    I'm doing Computer Science at <a href="https://ufsc.br" style={{height: 300}} target="_blank">UFSC</a>.
+                    If you're having trouble finding me, the UFSC is a good starting point
                   </p>
                 } 
                 header={
@@ -65,7 +63,7 @@ function Hello() {
                 } 
               />
               <Item
-                title='Follow me via' 
+                title='Follow me'
                 description={
                   <ul style={{listStyle: 'none', paddingLeft: 0}}>
                     <li><a href="https://github.com/mathbalduino" target="_blank">@mathbalduino</a> on GitHub</li>
