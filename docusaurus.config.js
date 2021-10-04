@@ -49,7 +49,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
             label: 'Documentation',
           },
           {
-            to: 'about',
+            href: 'https://mathbalduino.com.br/about',
             position: 'left',
             label: 'About',
           },

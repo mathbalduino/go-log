@@ -25,8 +25,8 @@ func main() {
 const baseFieldsCode = `package main
 
 import (
-	"github.com/mathbalduino/go-log"
-	"os"
+  "github.com/mathbalduino/go-log"
+  "os"
 )
 
 func main() {
