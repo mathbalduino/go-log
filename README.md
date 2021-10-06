@@ -1,12 +1,12 @@
 # go-log
 
-Docs live at [mathbalduino.com.br/go-log](https://mathbalduino.com.br/go-log){:target="_blank"}
+Docs live at <a href="https://mathbalduino.com.br/go-log" target="_blank">mathbalduino.com.br/go-log</a>
 
 ---
 
 ### Matheus Leonel Balduino
 
 Everywhere, under @mathbalduino
-- @mathbalduino on [GitHub](https://github.com/mathbalduino){:target="_blank"}
-- @mathbalduino on [Instagram](https://instagram.com/mathbalduino){:target="_blank"}
-- @mathbalduino on [Twitter](https://twitter.com/mathbalduino){:target="_blank"}
+- @mathbalduino on <a href="https://github.com/mathbalduino" target="_blank">GitHub</a>
+- @mathbalduino on <a href="https://instagram.com/mathbalduino" target="_blank">Instagram</a>
+- @mathbalduino on <a href="https://twitter.com/mathbalduino" target="_blank">Twitter</a>
