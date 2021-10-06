@@ -5,7 +5,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 /** @type {import('@docusaurus/types').DocusaurusConfig} */
 (module.exports = {
   title: 'go-log',
-  tagline: 'everywhere, under @mathbalduino',
+  tagline: 'Everywhere, under @mathbalduino',
   url: 'https://mathbalduino.com.br',
   baseUrl: '/go-log/',
   onBrokenLinks: 'throw',

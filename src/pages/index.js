@@ -31,7 +31,7 @@ function HomepageHeader() {
 export default function Home() {
   return (
     <Layout
-      description="go-log library online documentation">
+      description="go-log library documentation by @mathbalduino">
       <HomepageHeader />
       <main>
         <HomepageFeatures />
