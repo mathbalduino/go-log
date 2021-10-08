@@ -1,44 +1,44 @@
 package loggerCLI
 
-import "github.com/mathbalduino/go-log"
+import (
+	"fmt"
+)
 
-func (l *LoggerCLI) Trace(msg string, adHocFields ...logger.LogFields) *LoggerCLI {
+func (l *LoggerCLI) Trace(format string, args ...interface{}) *LoggerCLI {
 	baseLogger := nestLogger(l)
-	baseLogger.Trace(msg, adHocFields...)
+	baseLogger.Trace(fmt.Sprintf(format, args...))
 	return (*LoggerCLI)(baseLogger)
 }
-func (l *LoggerCLI) Debug(msg string, adHocFields ...logger.LogFields) *LoggerCLI {
+func (l *LoggerCLI) Debug(format string, args ...interface{}) *LoggerCLI {
 	baseLogger := nestLogger(l)
-	baseLogger.Debug(msg, adHocFields...)
+	baseLogger.Debug(fmt.Sprintf(format, args...))
 	return (*LoggerCLI)(baseLogger)
 }
-func (l *LoggerCLI) Info(msg string, adHocFields ...logger.LogFields) *LoggerCLI {
+func (l *LoggerCLI) Info(format string, args ...interface{}) *LoggerCLI {
 	baseLogger := nestLogger(l)
-	baseLogger.Info(msg, adHocFields...)
+	baseLogger.Info(fmt.Sprintf(format, args...))
 	return (*LoggerCLI)(baseLogger)
 }
-func (l *LoggerCLI) Warn(msg string, adHocFields ...logger.LogFields) *LoggerCLI {
+func (l *LoggerCLI) Warn(format string, args ...interface{}) *LoggerCLI {
 	baseLogger := nestLogger(l)
-	baseLogger.Warn(msg, adHocFields...)
+	baseLogger.Warn(fmt.Sprintf(format, args...))
 	return (*LoggerCLI)(baseLogger)
 }
-func (l *LoggerCLI) Error(msg string, adHocFields ...logger.LogFields) *LoggerCLI {
+func (l *LoggerCLI) Error(format string, args ...interface{}) *LoggerCLI {
 	baseLogger := nestLogger(l)
-	baseLogger.Error(msg, adHocFields...)
+	baseLogger.Error(fmt.Sprintf(format, args...))
 	return (*LoggerCLI)(baseLogger)
 }
-func (l *LoggerCLI) Fatal(msg string, adHocFields ...logger.LogFields) *LoggerCLI {
+func (l *LoggerCLI) Fatal(format string, args ...interface{}) {
 	baseLogger := nestLogger(l)
-	baseLogger.Fatal(msg, adHocFields...)
+	baseLogger.Fatal(fmt.Sprintf(format, args...))
+}
+func (l *LoggerCLI) ErrorFrom(e error) *LoggerCLI {
+	baseLogger := nestLogger(l)
+	baseLogger.ErrorFrom(e)
 	return (*LoggerCLI)(baseLogger)
 }
-func (l *LoggerCLI) ErrorFrom(e error, adHocFields ...logger.LogFields) *LoggerCLI {
+func (l *LoggerCLI) FatalFrom(e error) {
 	baseLogger := nestLogger(l)
-	baseLogger.ErrorFrom(e, adHocFields...)
-	return (*LoggerCLI)(baseLogger)
-}
-func (l *LoggerCLI) FatalFrom(e error, adHocFields ...logger.LogFields) *LoggerCLI {
-	baseLogger := nestLogger(l)
-	baseLogger.FatalFrom(e, adHocFields...)
-	return (*LoggerCLI)(baseLogger)
+	baseLogger.FatalFrom(e)
 }
