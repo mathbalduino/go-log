@@ -86,6 +86,11 @@ type Logger interface {
 	// by all other log methods (Trace, Debug, Warn, ...). If there's the
 	// need to create custom log levels, you must call this method.
 	Log(lvl uint64, msg string, adHocFields []LogFields)
+
+	// Configuration will set the given Configuration as the new one.
+	// Note that every Logger created before the one that called this
+	// method will point to the new Configuration
+	Configuration(c Configuration)
 }
 
 // logger is a struct that represents
