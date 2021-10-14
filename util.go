@@ -47,6 +47,26 @@ func ColorizeStrByLvl(lvl uint64, msg string) string {
 
 // -----
 
+// TODO: Para melhorar a performance na hora das clonagens,
+//		 pode ser interessante salvar referencia ao inves de copiar.
+//		 Para isso, essas structs podem ser usadas para substituir os
+//		 fields do Logger
+
+type fieldsChain struct {
+	parent *fieldsChain
+	fields LogFields
+}
+
+type hooksChain struct {
+	parent *hooksChain
+	hooks  Hooks
+}
+
+type outputsChain struct {
+	parent  *outputsChain
+	outputs []Output
+}
+
 // tryRead will read the given key from some LogFields,
 // returning nil if it's not present
 //
