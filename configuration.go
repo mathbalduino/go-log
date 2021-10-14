@@ -33,7 +33,7 @@ type Configuration struct {
 	ErrorParser func(error) (string, LogFields)
 }
 
-func (l *Logger) Configuration(c Configuration) { l.configuration = &c }
+func (l *logger) Configuration(c Configuration) { l.configuration = &c }
 
 // DefaultConfig creates a default Logger configuration,
 // with a synchronous approach (nil AsyncScheduler),

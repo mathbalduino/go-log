@@ -62,10 +62,10 @@ func readLogs(input string) []log {
 	return logsFields
 }
 
-type ABC struct {
+type LogTreeNode struct {
 	log
-	parentPtr *ABC
-	childs    []ABC
+	parentPtr *LogTreeNode
+	childs    []LogTreeNode
 }
 
 // side-effect
@@ -84,25 +84,25 @@ func orderLogs(logs []log) {
 	})
 }
 
-func logTree(logs []log) []ABC {
-	aux := map[string]*ABC{}
-	final := make([]ABC, 0, len(logs))
+func logTree(logs []log) []LogTreeNode {
+	aux := map[string]*LogTreeNode{}
+	final := make([]LogTreeNode, 0, len(logs))
 	for _, log := range logs {
 		timestamp := log.Timestamp
 		parent := aux[log.Parent]
 		if parent == nil {
-			final = append(final, ABC{log, nil, nil})
+			final = append(final, LogTreeNode{log, nil, nil})
 			aux[timestamp] = &final[len(final)-1]
 			continue
 		}
 
-		parent.childs = append(parent.childs, ABC{log, parent, nil})
+		parent.childs = append(parent.childs, LogTreeNode{log, parent, nil})
 		aux[timestamp] = &parent.childs[len(parent.childs)-1]
 	}
 	return final
 }
 
-func drawLogTree(tree []ABC, treeDepth int) string {
+func drawLogTree(tree []LogTreeNode, treeDepth int) string {
 	str := ""
 	for i, log := range tree {
 		isLast := i == len(tree)-1
@@ -128,17 +128,17 @@ func drawLogTree(tree []ABC, treeDepth int) string {
 		}
 		s := ""
 		j := 0
-		for ; j < len(log.Msg) / lineMaxLen; j++ {
+		for ; j < len(log.Msg)/lineMaxLen; j++ {
 			s += log.Msg[j*lineMaxLen:(j+1)*lineMaxLen] + "\n"
 		}
-		if len(log.Msg) % lineMaxLen > 0 {
-			s += log.Msg[j*lineMaxLen:j*lineMaxLen + len(log.Msg) % lineMaxLen]
+		if len(log.Msg)%lineMaxLen > 0 {
+			s += log.Msg[j*lineMaxLen : j*lineMaxLen+len(log.Msg)%lineMaxLen]
 		}
 		msgSlice := strings.Split(s, "\n")
 		for i, m := range msgSlice {
 			msgSlice[i] = logger.ColorizeStrByLvl(log.Lvl, m)
 		}
-		msg := strings.Join(msgSlice, "\n" + c)
+		msg := strings.Join(msgSlice, "\n"+c)
 
 		str += fmt.Sprintf(
 			prefix+logger.ColorizeStrByLvl(log.Lvl, "[ %s ] %s")+"\n",

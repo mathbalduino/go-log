@@ -10,9 +10,9 @@ func TestLog_Field(t *testing.T) {
 	t.Run("If the key is 'lvl' or 'msg', return the value immediately", func(t *testing.T) {
 		cfg := DefaultConfig()
 		l := Log{
-			logger: &Logger{configuration: &cfg},
-			msg: "some msg",
-			lvl: 999,
+			logger: &logger{configuration: &cfg},
+			msg:    "some msg",
+			lvl:    999,
 		}
 		v := l.Field(cfg.MsgFieldName)
 		if v.(string) != l.msg {
@@ -26,7 +26,7 @@ func TestLog_Field(t *testing.T) {
 	t.Run("Search postFields first", func(t *testing.T) {
 		cfg := DefaultConfig()
 		l := Log{
-			logger:      &Logger{fields: LogFields{"a": "ddd"}, configuration: &cfg},
+			logger:      &logger{fields: LogFields{"a": "ddd"}, configuration: &cfg},
 			preFields:   LogFields{"a": "ccc"},
 			adHocFields: []LogFields{{"a": "bbb"}},
 			postFields:  LogFields{"a": "aaa"},
@@ -39,7 +39,7 @@ func TestLog_Field(t *testing.T) {
 	t.Run("Search adHocFields after postFields", func(t *testing.T) {
 		cfg := DefaultConfig()
 		l := Log{
-			logger:      &Logger{fields: LogFields{"a": "ddd"}, configuration: &cfg},
+			logger:      &logger{fields: LogFields{"a": "ddd"}, configuration: &cfg},
 			preFields:   LogFields{"a": "ccc"},
 			adHocFields: []LogFields{{"a": "bbb", "z": "xxx"}, {"z": "zzz"}},
 			postFields:  LogFields{"b": "aaa"},
@@ -56,7 +56,7 @@ func TestLog_Field(t *testing.T) {
 	t.Run("Search preFields after adHocFields", func(t *testing.T) {
 		cfg := DefaultConfig()
 		l := Log{
-			logger:      &Logger{fields: LogFields{"a": "ddd"}, configuration: &cfg},
+			logger:      &logger{fields: LogFields{"a": "ddd"}, configuration: &cfg},
 			preFields:   LogFields{"a": "ccc"},
 			adHocFields: []LogFields{{"b": "bbb"}},
 			postFields:  LogFields{"b": "aaa"},
@@ -69,7 +69,7 @@ func TestLog_Field(t *testing.T) {
 	t.Run("Search fields after preFields", func(t *testing.T) {
 		cfg := DefaultConfig()
 		l := Log{
-			logger:      &Logger{fields: LogFields{"a": "ddd"}, configuration: &cfg},
+			logger:      &logger{fields: LogFields{"a": "ddd"}, configuration: &cfg},
 			preFields:   LogFields{"b": "ccc"},
 			adHocFields: []LogFields{{"b": "bbb"}},
 			postFields:  LogFields{"b": "aaa"},
@@ -87,7 +87,7 @@ func TestHandleLog(t *testing.T) {
 		c := DefaultConfig()
 		expectedFields := LogFields{"a": "aaa", "b": "bbb", "c": "ccc", c.LvlFieldName: uint64(0), c.MsgFieldName: "my msg"}
 		calls := 0
-		l := Log{lvl: 0, msg: "my msg", logger: &Logger{
+		l := Log{lvl: 0, msg: "my msg", logger: &logger{
 			configuration: &c,
 			outputs: []Output{func(lvl uint64, msg string, receivedFields LogFields) {
 				calls += 1
@@ -121,7 +121,7 @@ func TestHandleLog(t *testing.T) {
 		}
 		calls := 0
 		l := Log{lvl: 0, msg: "my msg",
-			logger: &Logger{
+			logger: &logger{
 				fields: LogFields{"overriddenField": "shouldOverrideThis", "field": "value"},
 				postHooks: Hooks{
 					"overriddenAdHoc_2": func(log Log) interface{} { return "newValue" },
@@ -151,7 +151,7 @@ func TestHandleLog(t *testing.T) {
 		timeA, timeB, timeC := time.Time{}, time.Time{}, time.Time{}
 		expectedFields := LogFields{c.LvlFieldName: uint64(0), c.MsgFieldName: "my msg"}
 		l := Log{lvl: 0, msg: "my msg",
-			logger: &Logger{
+			logger: &logger{
 				configuration: &c,
 				outputs: []Output{
 					func(lvl uint64, msg string, receivedFields LogFields) {
@@ -190,7 +190,7 @@ func TestHandleLog(t *testing.T) {
 		c := DefaultConfig()
 		calls := 0
 		l := Log{lvl: 0, msg: "my msg",
-			logger: &Logger{
+			logger: &logger{
 				configuration: &c,
 				outputs: []Output{func(lvl uint64, msg string, receivedFields LogFields) {
 					calls += 1

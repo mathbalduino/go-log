@@ -36,7 +36,7 @@ func TestNew(t *testing.T) {
 		lvl := "lvl"
 		msg := "msg"
 		m := &mockAsyncScheduler{}
-		l := New(Configuration{m, lvl, msg, lvlsEnabled, errorParser})
+		l := New(Configuration{m, lvl, msg, lvlsEnabled, errorParser}).(*logger)
 		if l.configuration == nil || l.outputs != nil || l.preHooks != nil || l.postHooks != nil || l.fields != nil {
 			t.Fatalf("Expected to be nil")
 		}
@@ -61,7 +61,7 @@ func TestNew(t *testing.T) {
 func TestNewDefault(t *testing.T) {
 	t.Run("Should use the default configuration", func(t *testing.T) {
 		c := DefaultConfig()
-		l := NewDefault()
+		l := NewDefault().(*logger)
 		if l.configuration.AsyncScheduler != c.AsyncScheduler {
 			t.Fatalf("Expected the correct AsyncScheduler")
 		}
@@ -79,7 +79,7 @@ func TestNewDefault(t *testing.T) {
 		}
 	})
 	t.Run("Should set two outputs, the first should log to stdout and the second panic on LvlFatal", raceFreeTest(func(t *testing.T) {
-		l := NewDefault()
+		l := NewDefault().(*logger)
 		if len(l.outputs) != 2 {
 			t.Fatalf("Expected to set some output")
 		}

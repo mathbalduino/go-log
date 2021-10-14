@@ -6,16 +6,16 @@ import (
 	"time"
 )
 
-func nestLogger(l_ *LoggerCLI) *logger.Logger {
-	l := (*logger.Logger)(l_)
-	fields := logger.LogFields{TimestampFieldName: fmt.Sprintf("%d", time.Now().UnixNano())}
-	parent := l.Field(TimestampFieldName)
+func nestLogger(l *loggerCLI) *loggerCLI {
+	fields := logger.LogFields{timestampFieldName: fmt.Sprintf("%d", time.Now().UnixNano())}
+	parent := l.baseLogger.Field(timestampFieldName)
 	if parent != nil {
-		fields[ParentFieldName] = parent
+		fields[parentFieldName] = parent
 	}
-	newLogger := l.Fields(fields)
-	return newLogger
+	return &loggerCLI{
+		l.baseLogger.Fields(fields),
+	}
 }
 
-const ParentFieldName = "parent"
-const TimestampFieldName = "timestamp"
+const parentFieldName = "parent"
+const timestampFieldName = "timestamp"

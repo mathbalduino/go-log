@@ -351,7 +351,7 @@ func TestAsyncHandleLog(t *testing.T) {
 		expectedLog := Log{
 			lvl:         LvlDebug,
 			msg:         "Some msg",
-			logger:      &Logger{},
+			logger:      &logger{},
 			preFields:   LogFields{"a": "aaa", "b": "bbb", "c": "ccc"},
 			adHocFields: []LogFields{{"d": "ddd", "e": "eee", "f": "fff"}},
 		}

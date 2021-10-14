@@ -9,7 +9,7 @@ package logger
 type Log struct {
 	lvl         uint64
 	msg         string
-	logger      *Logger
+	logger      *logger
 	preFields   LogFields
 	adHocFields []LogFields
 	postFields  LogFields

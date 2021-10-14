@@ -13,12 +13,10 @@ type Output = func(lvl uint64, msg string, fields LogFields)
 
 // OutputParser is just an alias to a function that is used
 // to parse the LogFields into a byte array, in order to write
-// it to a file, etc...
+// it to a file, etc, idk...
 type OutputParser = func(LogFields) ([]byte, error)
 
-// Outputs will append the given output params (including the variadic ones)
-// to the Logger outputs and return a new Logger instance
-func (l *Logger) Outputs(output Output, outputs ...Output) *Logger {
+func (l *logger) Outputs(output Output, outputs ...Output) Logger {
 	newLogger := cloneLogger(l)
 	if output != nil {
 		newLogger.outputs = append(newLogger.outputs, output)
@@ -31,10 +29,7 @@ func (l *Logger) Outputs(output Output, outputs ...Output) *Logger {
 	return newLogger
 }
 
-// RawOutputs will set the given output params (including the variadic ones)
-// to the Logger outputs, discarding the old value and returning a new Logger
-// instance
-func (l *Logger) RawOutputs(output Output, outputs ...Output) *Logger {
+func (l *logger) RawOutputs(output Output, outputs ...Output) Logger {
 	newLogger := cloneLogger(l)
 	newLogger.outputs = []Output{}
 	if output != nil {
@@ -48,8 +43,8 @@ func (l *Logger) RawOutputs(output Output, outputs ...Output) *Logger {
 	return newLogger
 }
 
-// OutputToWriter will call the given parser and write the results to the given io.Writer, calling
-// 'onError' with any errors that occur
+// OutputToWriter will call the given parser and write the returned values to the
+// given io.Writer, calling 'onError' with any errors that occur
 func OutputToWriter(w io.Writer, parser OutputParser, onError func(error)) Output {
 	return func(_ uint64, _ string, fields LogFields) {
 		data, e := parser(fields)
@@ -84,12 +79,12 @@ func OutputJsonToWriter(w io.Writer, onError func(error)) Output {
 // the log level
 func OutputAnsiToStdout(lvl uint64, msg string, _ LogFields) {
 	fmt.Printf(
-		ColorizeStrByLvl(lvl, "[ %s ] %s") + "\n",
+		ColorizeStrByLvl(lvl, "[ %s ] %s")+"\n",
 		LvlToString(lvl), strings.ReplaceAll(msg, "\n", "\n\t"))
 }
 
 // OutputPanicOnFatal will call "panic" if the lvl of the given log
-// is "LvlFatal", using the "error" interface inside the fields as
+// is LvlFatal, using the "error" interface inside the fields as
 // argument, if present. Otherwise, the log msg string will be used
 // to create a new error (using fmt.Errorf)
 func OutputPanicOnFatal(lvl uint64, msg string, fields LogFields) {

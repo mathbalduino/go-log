@@ -365,21 +365,21 @@ func TestNotEnabled(t *testing.T) {
 
 func TestCloneLogger(t *testing.T) {
 	t.Run("Should return a different Logger pointer", func(t *testing.T) {
-		l := &Logger{}
+		l := &logger{}
 		l2 := cloneLogger(l)
 		if reflect.ValueOf(l2).Pointer() == reflect.ValueOf(l).Pointer() {
 			t.Fatalf("Expected to return a new Logger, not the same")
 		}
 	})
 	t.Run("Should just copy the configuration pointer", func(t *testing.T) {
-		l := &Logger{configuration: &Configuration{}}
+		l := &logger{configuration: &Configuration{}}
 		l2 := cloneLogger(l)
 		if reflect.ValueOf(l2.configuration).Pointer() != reflect.ValueOf(l.configuration).Pointer() {
 			t.Fatalf("Expected to return a new Logger with the same configuration")
 		}
 	})
 	t.Run("Should clone the fields into a new LogFields", func(t *testing.T) {
-		l := &Logger{fields: LogFields{"a": "aaa", "b": "bbb", "c": "ccc"}}
+		l := &logger{fields: LogFields{"a": "aaa", "b": "bbb", "c": "ccc"}}
 		l2 := cloneLogger(l)
 		if reflect.ValueOf(l2.fields).Pointer() == reflect.ValueOf(l.fields).Pointer() {
 			t.Fatalf("Expected to return a Logger with a new LogFields")
@@ -392,7 +392,7 @@ func TestCloneLogger(t *testing.T) {
 		fnA := func(log Log) interface{} { return nil }
 		fnB := func(log Log) interface{} { return nil }
 		fnC := func(log Log) interface{} { return nil }
-		l := &Logger{preHooks: Hooks{"a": fnA, "b": fnB, "c": fnC}}
+		l := &logger{preHooks: Hooks{"a": fnA, "b": fnB, "c": fnC}}
 		l2 := cloneLogger(l)
 		if reflect.ValueOf(l2.preHooks).Pointer() == reflect.ValueOf(l.preHooks).Pointer() {
 			t.Fatalf("Expected to return a Logger with a new preHooks")
@@ -407,7 +407,7 @@ func TestCloneLogger(t *testing.T) {
 		fnA := func(log Log) interface{} { return nil }
 		fnB := func(log Log) interface{} { return nil }
 		fnC := func(log Log) interface{} { return nil }
-		l := &Logger{postHooks: Hooks{"a": fnA, "b": fnB, "c": fnC}}
+		l := &logger{postHooks: Hooks{"a": fnA, "b": fnB, "c": fnC}}
 		l2 := cloneLogger(l)
 		if reflect.ValueOf(l2.postHooks).Pointer() == reflect.ValueOf(l.postHooks).Pointer() {
 			t.Fatalf("Expected to return a Logger with a new postHooks")
@@ -422,7 +422,7 @@ func TestCloneLogger(t *testing.T) {
 		outA := func(lvl uint64, msg string, fields LogFields) {}
 		outB := func(lvl uint64, msg string, fields LogFields) {}
 		outC := func(lvl uint64, msg string, fields LogFields) {}
-		l := &Logger{outputs: []Output{outA, outB, outC}}
+		l := &logger{outputs: []Output{outA, outB, outC}}
 		l2 := cloneLogger(l)
 		if reflect.ValueOf(l2.outputs).Pointer() == reflect.ValueOf(l.outputs).Pointer() {
 			t.Fatalf("Expected to return a Logger with a new outputs")

@@ -10,16 +10,16 @@ import (
 
 func TestLogger_Outputs(t *testing.T) {
 	t.Run("Should return a new equal instance of src", func(t *testing.T) {
-		l := &Logger{}
-		newLog := l.Outputs(nil)
+		l := &logger{}
+		newLog := l.Outputs(nil).(*logger)
 		if reflect.ValueOf(l).Pointer() == reflect.ValueOf(newLog).Pointer() {
 			t.Fatalf("Expected a different instance")
 		}
 	})
 	t.Run("The new instance should point to the same configuration", func(t *testing.T) {
 		c := &Configuration{}
-		l := &Logger{configuration: c}
-		newLog := l.Outputs(nil)
+		l := &logger{configuration: c}
+		newLog := l.Outputs(nil).(*logger)
 		if reflect.ValueOf(l.configuration).Pointer() != reflect.ValueOf(newLog.configuration).Pointer() {
 			t.Fatalf("Expected the same configuration")
 		}
@@ -31,13 +31,13 @@ func TestLogger_Outputs(t *testing.T) {
 		fnG := func(log Log) interface{} { return nil }
 		outH := func(lvl uint64, msg string, fields LogFields) {}
 		outI := func(lvl uint64, msg string, fields LogFields) {}
-		l := &Logger{
+		l := &logger{
 			fields:    LogFields{"a": "aaa", "b": "bbb", "c": "ccc"},
 			preHooks:  Hooks{"d": fnD, "e": fnE},
 			postHooks: Hooks{"f": fnF, "g": fnG},
 			outputs:   []Output{outH, outI},
 		}
-		newLog := l.Outputs(nil)
+		newLog := l.Outputs(nil).(*logger)
 		if reflect.ValueOf(l.fields).Pointer() == reflect.ValueOf(newLog.fields).Pointer() {
 			t.Fatalf("Expected to be a different fields map")
 		}
@@ -84,8 +84,8 @@ func TestLogger_Outputs(t *testing.T) {
 		fnC := func(lvl uint64, msg string, fields LogFields) {}
 		fnD := func(lvl uint64, msg string, fields LogFields) {}
 		fnE := func(lvl uint64, msg string, fields LogFields) {}
-		l := &Logger{outputs: []Output{fnA, fnB, fnC}}
-		newLog := l.Outputs(nil, nil, fnD, nil, nil, fnE)
+		l := &logger{outputs: []Output{fnA, fnB, fnC}}
+		newLog := l.Outputs(nil, nil, fnD, nil, nil, fnE).(*logger)
 		if len(newLog.outputs) != 5 ||
 			reflect.ValueOf(newLog.outputs[0]).Pointer() != reflect.ValueOf(fnA).Pointer() ||
 			reflect.ValueOf(newLog.outputs[1]).Pointer() != reflect.ValueOf(fnB).Pointer() ||
@@ -101,8 +101,8 @@ func TestLogger_Outputs(t *testing.T) {
 		fnC := func(lvl uint64, msg string, fields LogFields) {}
 		fnD := func(lvl uint64, msg string, fields LogFields) {}
 		fnE := func(lvl uint64, msg string, fields LogFields) {}
-		l := &Logger{outputs: []Output{fnA, fnB, fnC}}
-		newLog := l.Outputs(fnD, fnE)
+		l := &logger{outputs: []Output{fnA, fnB, fnC}}
+		newLog := l.Outputs(fnD, fnE).(*logger)
 		if len(newLog.outputs) != 5 ||
 			reflect.ValueOf(newLog.outputs[0]).Pointer() != reflect.ValueOf(fnA).Pointer() ||
 			reflect.ValueOf(newLog.outputs[1]).Pointer() != reflect.ValueOf(fnB).Pointer() ||
@@ -116,16 +116,16 @@ func TestLogger_Outputs(t *testing.T) {
 
 func TestLogger_RawOutputs(t *testing.T) {
 	t.Run("Should return a new equal instance of src", func(t *testing.T) {
-		l := &Logger{}
-		newLog := l.RawOutputs(nil)
+		l := &logger{}
+		newLog := l.RawOutputs(nil).(*logger)
 		if reflect.ValueOf(l).Pointer() == reflect.ValueOf(newLog).Pointer() {
 			t.Fatalf("Expected a different instance")
 		}
 	})
 	t.Run("The new instance should point to the same configuration", func(t *testing.T) {
 		c := &Configuration{}
-		l := &Logger{configuration: c}
-		newLog := l.RawOutputs(nil)
+		l := &logger{configuration: c}
+		newLog := l.RawOutputs(nil).(*logger)
 		if reflect.ValueOf(l.configuration).Pointer() != reflect.ValueOf(newLog.configuration).Pointer() {
 			t.Fatalf("Expected the same configuration")
 		}
@@ -137,13 +137,13 @@ func TestLogger_RawOutputs(t *testing.T) {
 		fnG := func(log Log) interface{} { return nil }
 		outH := func(lvl uint64, msg string, fields LogFields) {}
 		outI := func(lvl uint64, msg string, fields LogFields) {}
-		l := &Logger{
+		l := &logger{
 			fields:    LogFields{"a": "aaa", "b": "bbb", "c": "ccc"},
 			preHooks:  Hooks{"d": fnD, "e": fnE},
 			postHooks: Hooks{"f": fnF, "g": fnG},
 			outputs:   []Output{outH, outI},
 		}
-		newLog := l.RawOutputs(nil)
+		newLog := l.RawOutputs(nil).(*logger)
 		if reflect.ValueOf(l.fields).Pointer() == reflect.ValueOf(newLog.fields).Pointer() {
 			t.Fatalf("Expected to be a different fields map")
 		}
@@ -177,8 +177,8 @@ func TestLogger_RawOutputs(t *testing.T) {
 		fnA := func(lvl uint64, msg string, fields LogFields) {}
 		fnB := func(lvl uint64, msg string, fields LogFields) {}
 		fnC := func(lvl uint64, msg string, fields LogFields) {}
-		l := &Logger{outputs: []Output{fnA, fnB, fnC}}
-		newLog := l.RawOutputs(nil, nil, nil, nil)
+		l := &logger{outputs: []Output{fnA, fnB, fnC}}
+		newLog := l.RawOutputs(nil, nil, nil, nil).(*logger)
 		if len(newLog.outputs) != 0 {
 			t.Fatalf("Expected set the src outputs to an empty slice")
 		}
@@ -189,8 +189,8 @@ func TestLogger_RawOutputs(t *testing.T) {
 		fnC := func(lvl uint64, msg string, fields LogFields) {}
 		fnD := func(lvl uint64, msg string, fields LogFields) {}
 		fnE := func(lvl uint64, msg string, fields LogFields) {}
-		l := &Logger{outputs: []Output{fnA, fnB, fnC}}
-		newLog := l.RawOutputs(nil, nil, fnD, nil, nil, fnE)
+		l := &logger{outputs: []Output{fnA, fnB, fnC}}
+		newLog := l.RawOutputs(nil, nil, fnD, nil, nil, fnE).(*logger)
 		if len(newLog.outputs) != 2 ||
 			reflect.ValueOf(newLog.outputs[0]).Pointer() != reflect.ValueOf(fnD).Pointer() ||
 			reflect.ValueOf(newLog.outputs[1]).Pointer() != reflect.ValueOf(fnE).Pointer() {
@@ -203,8 +203,8 @@ func TestLogger_RawOutputs(t *testing.T) {
 		fnC := func(lvl uint64, msg string, fields LogFields) {}
 		fnD := func(lvl uint64, msg string, fields LogFields) {}
 		fnE := func(lvl uint64, msg string, fields LogFields) {}
-		l := &Logger{outputs: []Output{fnA, fnB, fnC}}
-		newLog := l.RawOutputs(fnD, fnE)
+		l := &logger{outputs: []Output{fnA, fnB, fnC}}
+		newLog := l.RawOutputs(fnD, fnE).(*logger)
 		if len(newLog.outputs) != 2 ||
 			reflect.ValueOf(newLog.outputs[0]).Pointer() != reflect.ValueOf(fnD).Pointer() ||
 			reflect.ValueOf(newLog.outputs[1]).Pointer() != reflect.ValueOf(fnE).Pointer() {
@@ -326,9 +326,9 @@ func TestOutputJsonToFile(t *testing.T) {
 	})
 	t.Run("Should call onError if there's errors with the json.Marshal", func(t *testing.T) {
 		onErrorCalls := 0
-		onError := func(receivedErr error) {onErrorCalls += 1		}
+		onError := func(receivedErr error) { onErrorCalls += 1 }
 		o := OutputJsonToWriter(nil, onError)
-		o(0, "", LogFields{"a": func(){}})
+		o(0, "", LogFields{"a": func() {}})
 		if onErrorCalls != 1 {
 			t.Fatalf("Expeted to call onError")
 		}
@@ -370,7 +370,7 @@ func TestOutputToAnsiStdout(t *testing.T) {
 		if e != nil {
 			t.Fatalf("Error not expected")
 		}
-		if string(b) != ColorizeStrByLvl(LvlError, "[ ERROR ] some msg") + "\n" {
+		if string(b) != ColorizeStrByLvl(LvlError, "[ ERROR ] some msg")+"\n" {
 			t.Fatalf("Expected a different msg")
 		}
 	}, wStdOut))

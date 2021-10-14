@@ -18,7 +18,7 @@ func TestLog(t *testing.T) {
 			calls += 1
 			return c
 		}}
-		l := &Logger{configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: LvlTrace}}
+		l := &logger{configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: LvlTrace}}
 		l.Log(LvlDebug, "", nil)
 		if len(c) != 0 || calls != 0 {
 			t.Fatalf("Expected to return immediately")
@@ -28,7 +28,7 @@ func TestLog(t *testing.T) {
 		oldHandleLog := handleLog
 		defer func() { handleLog = oldHandleLog }()
 		handleLogCalls := 0
-		handleLog = func(log Log) { handleLogCalls += 1}
+		handleLog = func(log Log) { handleLogCalls += 1 }
 
 		lvl := LvlTrace
 		msg := "some msg"
@@ -46,7 +46,7 @@ func TestLog(t *testing.T) {
 			calls += 1
 			return c
 		}}
-		l := &Logger{
+		l := &logger{
 			configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: lvl},
 			preHooks:      Hooks{"i": fnI, "j": fnJ, "k": fnK},
 		}
@@ -89,7 +89,7 @@ func TestLog(t *testing.T) {
 		fnI := func(log Log) interface{} { return "iii" }
 		fnJ := func(log Log) interface{} { return "jjj" }
 		fnK := func(log Log) interface{} { return "kkk" }
-		l := &Logger{
+		l := &logger{
 			configuration: &Configuration{LvlsEnabled: lvl},
 			preHooks:      Hooks{"i": fnI, "j": fnJ, "k": fnK},
 		}
@@ -130,7 +130,7 @@ func TestLog(t *testing.T) {
 		}
 		c := make(chan Log, 1)
 		m := &mockAsyncScheduler{mockNextChannel: func() chan<- Log { return c }}
-		l := &Logger{configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: LvlTrace}}
+		l := &logger{configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: LvlTrace}}
 		l.Trace(msg, adHocFields...)
 		receivedLog := <-c
 		if receivedLog.lvl != LvlTrace {
@@ -152,7 +152,7 @@ func TestLog(t *testing.T) {
 		}
 		c := make(chan Log, 1)
 		m := &mockAsyncScheduler{mockNextChannel: func() chan<- Log { return c }}
-		l := &Logger{configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: LvlDebug}}
+		l := &logger{configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: LvlDebug}}
 		l.Debug(msg, adHocFields...)
 		receivedLog := <-c
 		if receivedLog.lvl != LvlDebug {
@@ -174,7 +174,7 @@ func TestLog(t *testing.T) {
 		}
 		c := make(chan Log, 1)
 		m := &mockAsyncScheduler{mockNextChannel: func() chan<- Log { return c }}
-		l := &Logger{configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: LvlInfo}}
+		l := &logger{configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: LvlInfo}}
 		l.Info(msg, adHocFields...)
 		receivedLog := <-c
 		if receivedLog.lvl != LvlInfo {
@@ -196,7 +196,7 @@ func TestLog(t *testing.T) {
 		}
 		c := make(chan Log, 1)
 		m := &mockAsyncScheduler{mockNextChannel: func() chan<- Log { return c }}
-		l := &Logger{configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: LvlWarn}}
+		l := &logger{configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: LvlWarn}}
 		l.Warn(msg, adHocFields...)
 		receivedLog := <-c
 		if receivedLog.lvl != LvlWarn {
@@ -218,7 +218,7 @@ func TestLog(t *testing.T) {
 		}
 		c := make(chan Log, 1)
 		m := &mockAsyncScheduler{mockNextChannel: func() chan<- Log { return c }}
-		l := &Logger{configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: LvlError}}
+		l := &logger{configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: LvlError}}
 		l.Error(msg, adHocFields...)
 		receivedLog := <-c
 		if receivedLog.lvl != LvlError {
@@ -240,7 +240,7 @@ func TestLog(t *testing.T) {
 		}
 		c := make(chan Log, 1)
 		m := &mockAsyncScheduler{mockNextChannel: func() chan<- Log { return c }}
-		l := &Logger{configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: LvlFatal}}
+		l := &logger{configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: LvlFatal}}
 		l.Fatal(msg, adHocFields...)
 		receivedLog := <-c
 		if receivedLog.lvl != LvlFatal {
@@ -264,7 +264,7 @@ func TestLog(t *testing.T) {
 		m := &mockAsyncScheduler{mockNextChannel: func() chan<- Log { return c }}
 		e := fmt.Errorf("some random string")
 		calls := 0
-		l := &Logger{configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: LvlError, ErrorParser: func(err error) (string, LogFields) {
+		l := &logger{configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: LvlError, ErrorParser: func(err error) (string, LogFields) {
 			calls += 1
 			if e != err {
 				t.Fatalf("Expected the correct error")
@@ -297,7 +297,7 @@ func TestLog(t *testing.T) {
 		m := &mockAsyncScheduler{mockNextChannel: func() chan<- Log { return c }}
 		e := fmt.Errorf("some random string")
 		calls := 0
-		l := &Logger{configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: LvlError, ErrorParser: func(err error) (string, LogFields) {
+		l := &logger{configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: LvlError, ErrorParser: func(err error) (string, LogFields) {
 			calls += 1
 			if e != err {
 				t.Fatalf("Expected the correct error")
@@ -330,7 +330,7 @@ func TestLog(t *testing.T) {
 		m := &mockAsyncScheduler{mockNextChannel: func() chan<- Log { return c }}
 		e := fmt.Errorf("some random string")
 		calls := 0
-		l := &Logger{configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: LvlFatal, ErrorParser: func(err error) (string, LogFields) {
+		l := &logger{configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: LvlFatal, ErrorParser: func(err error) (string, LogFields) {
 			calls += 1
 			if e != err {
 				t.Fatalf("Expected the correct error")
@@ -363,7 +363,7 @@ func TestLog(t *testing.T) {
 		m := &mockAsyncScheduler{mockNextChannel: func() chan<- Log { return c }}
 		e := fmt.Errorf("some random string")
 		calls := 0
-		l := &Logger{configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: LvlFatal, ErrorParser: func(err error) (string, LogFields) {
+		l := &logger{configuration: &Configuration{AsyncScheduler: m, LvlsEnabled: LvlFatal, ErrorParser: func(err error) (string, LogFields) {
 			calls += 1
 			if e != err {
 				t.Fatalf("Expected the correct error")

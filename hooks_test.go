@@ -7,16 +7,16 @@ import (
 
 func TestPreHooks(t *testing.T) {
 	t.Run("Should return a new equal instance of src", func(t *testing.T) {
-		l := &Logger{}
-		newLog := l.PreHooks(nil)
+		l := &logger{}
+		newLog := l.PreHooks(nil).(*logger)
 		if reflect.ValueOf(l).Pointer() == reflect.ValueOf(newLog).Pointer() {
 			t.Fatalf("Expected a different instance")
 		}
 	})
 	t.Run("The new instance should point to the same configuration", func(t *testing.T) {
 		c := &Configuration{}
-		l := &Logger{configuration: c}
-		newLog := l.PreHooks(nil)
+		l := &logger{configuration: c}
+		newLog := l.PreHooks(nil).(*logger)
 		if reflect.ValueOf(l.configuration).Pointer() != reflect.ValueOf(newLog.configuration).Pointer() {
 			t.Fatalf("Expected the same configuration")
 		}
@@ -28,13 +28,13 @@ func TestPreHooks(t *testing.T) {
 		fnG := func(log Log) interface{} { return nil }
 		outH := func(lvl uint64, msg string, fields LogFields) {}
 		outI := func(lvl uint64, msg string, fields LogFields) {}
-		l := &Logger{
+		l := &logger{
 			fields:    LogFields{"a": "aaa", "b": "bbb", "c": "ccc"},
 			preHooks:  Hooks{"d": fnD, "e": fnE},
 			postHooks: Hooks{"f": fnF, "g": fnG},
 			outputs:   []Output{outH, outI},
 		}
-		newLog := l.PreHooks(nil)
+		newLog := l.PreHooks(nil).(*logger)
 		if reflect.ValueOf(l.fields).Pointer() == reflect.ValueOf(newLog.fields).Pointer() {
 			t.Fatalf("Expected to be a different fields map")
 		}
@@ -82,8 +82,8 @@ func TestPreHooks(t *testing.T) {
 		fnD := func(log Log) interface{} { return nil }
 		fnE := func(log Log) interface{} { return nil }
 		preHooks := Hooks{"b": fnD, "d": fnE}
-		l := &Logger{preHooks: Hooks{"a": fnA, "b": fnB, "c": fnC}}
-		newLog := l.PreHooks(preHooks)
+		l := &logger{preHooks: Hooks{"a": fnA, "b": fnB, "c": fnC}}
+		newLog := l.PreHooks(preHooks).(*logger)
 		if reflect.ValueOf(newLog.preHooks["a"]).Pointer() != reflect.ValueOf(fnA).Pointer() ||
 			reflect.ValueOf(newLog.preHooks["b"]).Pointer() != reflect.ValueOf(fnD).Pointer() ||
 			reflect.ValueOf(newLog.preHooks["c"]).Pointer() != reflect.ValueOf(fnC).Pointer() ||
@@ -95,16 +95,16 @@ func TestPreHooks(t *testing.T) {
 
 func TestRawPreHooks(t *testing.T) {
 	t.Run("Should return a new equal instance of src", func(t *testing.T) {
-		l := &Logger{}
-		newLog := l.RawPreHooks(nil)
+		l := &logger{}
+		newLog := l.RawPreHooks(nil).(*logger)
 		if reflect.ValueOf(l).Pointer() == reflect.ValueOf(newLog).Pointer() {
 			t.Fatalf("Expected a different instance")
 		}
 	})
 	t.Run("The new instance should point to the same configuration", func(t *testing.T) {
 		c := &Configuration{}
-		l := &Logger{configuration: c}
-		newLog := l.RawPreHooks(nil)
+		l := &logger{configuration: c}
+		newLog := l.RawPreHooks(nil).(*logger)
 		if reflect.ValueOf(l.configuration).Pointer() != reflect.ValueOf(newLog.configuration).Pointer() {
 			t.Fatalf("Expected the same configuration")
 		}
@@ -114,12 +114,12 @@ func TestRawPreHooks(t *testing.T) {
 		fnG := func(log Log) interface{} { return nil }
 		outH := func(lvl uint64, msg string, fields LogFields) {}
 		outI := func(lvl uint64, msg string, fields LogFields) {}
-		l := &Logger{
+		l := &logger{
 			fields:    LogFields{"a": "aaa", "b": "bbb", "c": "ccc"},
 			postHooks: Hooks{"f": fnF, "g": fnG},
 			outputs:   []Output{outH, outI},
 		}
-		newLog := l.RawPreHooks(nil)
+		newLog := l.RawPreHooks(nil).(*logger)
 		if reflect.ValueOf(l.fields).Pointer() == reflect.ValueOf(newLog.fields).Pointer() {
 			t.Fatalf("Expected to be a different fields map")
 		}
@@ -156,8 +156,8 @@ func TestRawPreHooks(t *testing.T) {
 		fnD := func(log Log) interface{} { return nil }
 		fnE := func(log Log) interface{} { return nil }
 		preHooks := Hooks{"b": fnD, "d": fnE}
-		l := &Logger{preHooks: Hooks{"a": fnA, "b": fnB, "c": fnC}}
-		newLog := l.RawPreHooks(preHooks)
+		l := &logger{preHooks: Hooks{"a": fnA, "b": fnB, "c": fnC}}
+		newLog := l.RawPreHooks(preHooks).(*logger)
 		if len(newLog.preHooks) != 2 ||
 			reflect.ValueOf(newLog.preHooks["b"]).Pointer() != reflect.ValueOf(fnD).Pointer() ||
 			reflect.ValueOf(newLog.preHooks["d"]).Pointer() != reflect.ValueOf(fnE).Pointer() {
@@ -168,16 +168,16 @@ func TestRawPreHooks(t *testing.T) {
 
 func TestPostHooks(t *testing.T) {
 	t.Run("Should return a new equal instance of src", func(t *testing.T) {
-		l := &Logger{}
-		newLog := l.PostHooks(nil)
+		l := &logger{}
+		newLog := l.PostHooks(nil).(*logger)
 		if reflect.ValueOf(l).Pointer() == reflect.ValueOf(newLog).Pointer() {
 			t.Fatalf("Expected a different instance")
 		}
 	})
 	t.Run("The new instance should point to the same configuration", func(t *testing.T) {
 		c := &Configuration{}
-		l := &Logger{configuration: c}
-		newLog := l.PostHooks(nil)
+		l := &logger{configuration: c}
+		newLog := l.PostHooks(nil).(*logger)
 		if reflect.ValueOf(l.configuration).Pointer() != reflect.ValueOf(newLog.configuration).Pointer() {
 			t.Fatalf("Expected the same configuration")
 		}
@@ -189,13 +189,13 @@ func TestPostHooks(t *testing.T) {
 		fnG := func(log Log) interface{} { return nil }
 		outH := func(lvl uint64, msg string, fields LogFields) {}
 		outI := func(lvl uint64, msg string, fields LogFields) {}
-		l := &Logger{
+		l := &logger{
 			fields:    LogFields{"a": "aaa", "b": "bbb", "c": "ccc"},
 			preHooks:  Hooks{"d": fnD, "e": fnE},
 			postHooks: Hooks{"f": fnF, "g": fnG},
 			outputs:   []Output{outH, outI},
 		}
-		newLog := l.PostHooks(nil)
+		newLog := l.PostHooks(nil).(*logger)
 		if reflect.ValueOf(l.fields).Pointer() == reflect.ValueOf(newLog.fields).Pointer() {
 			t.Fatalf("Expected to be a different fields map")
 		}
@@ -243,8 +243,8 @@ func TestPostHooks(t *testing.T) {
 		fnD := func(log Log) interface{} { return nil }
 		fnE := func(log Log) interface{} { return nil }
 		postHooks := Hooks{"b": fnD, "d": fnE}
-		l := &Logger{postHooks: Hooks{"a": fnA, "b": fnB, "c": fnC}}
-		newLog := l.PostHooks(postHooks)
+		l := &logger{postHooks: Hooks{"a": fnA, "b": fnB, "c": fnC}}
+		newLog := l.PostHooks(postHooks).(*logger)
 		if reflect.ValueOf(newLog.postHooks["a"]).Pointer() != reflect.ValueOf(fnA).Pointer() ||
 			reflect.ValueOf(newLog.postHooks["b"]).Pointer() != reflect.ValueOf(fnD).Pointer() ||
 			reflect.ValueOf(newLog.postHooks["c"]).Pointer() != reflect.ValueOf(fnC).Pointer() ||
@@ -256,16 +256,16 @@ func TestPostHooks(t *testing.T) {
 
 func TestRawPostHooks(t *testing.T) {
 	t.Run("Should return a new equal instance of src", func(t *testing.T) {
-		l := &Logger{}
-		newLog := l.RawPostHooks(nil)
+		l := &logger{}
+		newLog := l.RawPostHooks(nil).(*logger)
 		if reflect.ValueOf(l).Pointer() == reflect.ValueOf(newLog).Pointer() {
 			t.Fatalf("Expected a different instance")
 		}
 	})
 	t.Run("The new instance should point to the same configuration", func(t *testing.T) {
 		c := &Configuration{}
-		l := &Logger{configuration: c}
-		newLog := l.RawPostHooks(nil)
+		l := &logger{configuration: c}
+		newLog := l.RawPostHooks(nil).(*logger)
 		if reflect.ValueOf(l.configuration).Pointer() != reflect.ValueOf(newLog.configuration).Pointer() {
 			t.Fatalf("Expected the same configuration")
 		}
@@ -275,12 +275,12 @@ func TestRawPostHooks(t *testing.T) {
 		fnG := func(log Log) interface{} { return nil }
 		outH := func(lvl uint64, msg string, fields LogFields) {}
 		outI := func(lvl uint64, msg string, fields LogFields) {}
-		l := &Logger{
+		l := &logger{
 			fields:   LogFields{"a": "aaa", "b": "bbb", "c": "ccc"},
 			preHooks: Hooks{"f": fnF, "g": fnG},
 			outputs:  []Output{outH, outI},
 		}
-		newLog := l.RawPostHooks(nil)
+		newLog := l.RawPostHooks(nil).(*logger)
 		if reflect.ValueOf(l.fields).Pointer() == reflect.ValueOf(newLog.fields).Pointer() {
 			t.Fatalf("Expected to be a different fields map")
 		}
@@ -317,8 +317,8 @@ func TestRawPostHooks(t *testing.T) {
 		fnD := func(log Log) interface{} { return nil }
 		fnE := func(log Log) interface{} { return nil }
 		postHooks := Hooks{"b": fnD, "d": fnE}
-		l := &Logger{postHooks: Hooks{"a": fnA, "b": fnB, "c": fnC}}
-		newLog := l.RawPostHooks(postHooks)
+		l := &logger{postHooks: Hooks{"a": fnA, "b": fnB, "c": fnC}}
+		newLog := l.RawPostHooks(postHooks).(*logger)
 		if len(newLog.postHooks) != 2 ||
 			reflect.ValueOf(newLog.postHooks["b"]).Pointer() != reflect.ValueOf(fnD).Pointer() ||
 			reflect.ValueOf(newLog.postHooks["d"]).Pointer() != reflect.ValueOf(fnE).Pointer() {

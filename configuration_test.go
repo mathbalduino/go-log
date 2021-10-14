@@ -11,7 +11,7 @@ func TestLogger_Configuration(t *testing.T) {
 		c1 := &Configuration{LvlFieldName: "lvlFieldName_1"}
 		c2 := Configuration{LvlFieldName: "lvlFieldName_2"}
 
-		l := &Logger{configuration: c1}
+		l := &logger{configuration: c1}
 		l.Configuration(c2)
 		if l.configuration.LvlFieldName != c2.LvlFieldName {
 			t.Fatalf("Expected to change the Logger Configuration to the received arg")

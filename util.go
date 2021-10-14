@@ -129,10 +129,10 @@ func notEnabled(flags uint64, logLvl uint64) bool { return (flags & logLvl) == 0
 
 // cloneLogger will create a new identical Logger
 // instance from the given one
-func cloneLogger(l *Logger) *Logger {
+func cloneLogger(l *logger) *logger {
 	outputs := make([]Output, len(l.outputs))
 	copy(outputs, l.outputs)
-	return &Logger{
+	return &logger{
 		configuration: l.configuration,
 		fields:        cloneOrNew(l.fields),
 		preHooks:      cloneOrNew_(l.preHooks),
