@@ -56,6 +56,10 @@ const (
 )
 ```
 
+:::tip
+If you need to convert the log level `uint64` to some string representation, you can use the `LvlToString` function, exported by the root package.
+:::
+
 ## Default configuration
 
 The library comes with a builtin `Default Configuration`, accessible by calling the `DefaultConfig()` root package function, that will handle the most basic scenarios:

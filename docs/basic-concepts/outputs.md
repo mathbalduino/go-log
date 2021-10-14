@@ -144,3 +144,18 @@ func OutputPanicOnFatal(lvl uint64, msg string, fields LogFields) {
 ```
 
 If you're using a different `ErrorParser`, other than the [DefaultErrorParser](log_levels.md#default-errorparser), make sure that the error value is stored inside the `LogFields` under the `DefaultErrorKey` key. ~~Or not, it's up to you~~
+
+## Writing your own outputs
+
+If you're going to write your own `Outputs`, there's two functions that you need to know about: 
+
+```go
+func LvlToString(lvl uint64) string { ... }
+func ColorizeStrByLvl(lvl uint64, msg string) string { ... }
+```
+
+These functions are used internally by some builtin outputs, but are exported, so you can use too. The first one (`LvlToString`) will take the log level `uint64` and return the string that represents it. The second one (`ColorizeStrByLvl`) will take the log level `uint64` and an arbitrary `string`, returning a new `string` wrapped with the `ANSI` code that is used to colorize that log level.
+
+:::note
+Remember that these functions will ignore any custom log levels, written outside the library
+:::
