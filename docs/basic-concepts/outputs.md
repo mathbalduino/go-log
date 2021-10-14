@@ -30,8 +30,8 @@ Just like `Hooks`, you can set a new `Output` using the `Outputs`/`RawOutputs` m
 
 ```go
 // outputs.go
-func (l *Logger) Outputs(output Output, outputs ...Output) *Logger { ... }
-func (l *Logger) RawOutputs(output Output, outputs ...Output) *Logger { ... }
+func Outputs(output Output, outputs ...Output) *Logger { ... }
+func RawOutputs(output Output, outputs ...Output) *Logger { ... }
 ```
 
 Note that it's a variadic function, so you can pass as many outputs as you want. The order will be preserved.

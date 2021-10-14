@@ -8,8 +8,8 @@ You can customize the `PreHooks` of the `Logger` instance using the following me
 
 ```go
 // hooks.go
-func (l *Logger) PreHooks(hooks Hooks) *Logger { ... }
-func (l *Logger) RawPreHooks(hooks Hooks) *Logger { ... }
+func PreHooks(hooks Hooks) Logger { ... }
+func RawPreHooks(hooks Hooks) Logger { ... }
 ```
 
 :::note

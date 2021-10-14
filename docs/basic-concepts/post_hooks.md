@@ -8,8 +8,8 @@ You can customize the `PostHooks` of the `Logger` instance using the following m
 
 ```go
 // hooks.go
-func (l *Logger) PostHooks(hooks Hooks) *Logger { ... }
-func (l *Logger) RawPostHooks(hooks Hooks) *Logger { ... }
+func PostHooks(hooks Hooks) *Logger { ... }
+func RawPostHooks(hooks Hooks) *Logger { ... }
 ```
 
 :::note

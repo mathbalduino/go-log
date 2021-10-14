@@ -8,8 +8,8 @@ You can customize the `Base Fields` of the `Logger` instance using the following
 
 ```go
 // fields.go
-func (l *Logger) Fields(fields LogFields) *Logger { ... }
-func (l *Logger) RawFields(fields LogFields) *Logger { ... }
+func Fields(fields LogFields) Logger { ... }
+func RawFields(fields LogFields) Logger { ... }
 ```
 
 :::note
@@ -22,7 +22,7 @@ There's a third method, used to query `Base Fields` of the `Logger` instance:
 
 ```go
 // fields.go
-func (l *Logger) Field(key string) interface{} { ... }
+func Field(key string) interface{} { ... }
 ```
 
 ## Fields method

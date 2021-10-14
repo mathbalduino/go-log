@@ -9,14 +9,14 @@ sidebar_position: 4
 Every Log level method can accept `AdHoc fields` (even custom ones), because all log levels must call `Logger.Log()` in the end (that accepts `AdHoc fields`):
 
 ```go
-func (l *Logger) Log(lvl uint64, msg string, adHocFields []LogFields) { ... }
+func Log(lvl uint64, msg string, adHocFields []LogFields) { ... }
 ```
 
 The `Logger.Log()` receives the `AdHoc fields` as a `slice` of `LogFields` just to ease the forwarding from the log custom levels: 
 
 ```go
 // logLevels.go
-func (l *Logger) Trace(msg string, adHocFields ...LogFields) { 
+func Trace(msg string, adHocFields ...LogFields) { 
   l.Log(LvlTrace, msg, adHocFields)
 }
 ```

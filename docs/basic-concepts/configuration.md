@@ -23,6 +23,8 @@ type Configuration struct {
 - `LvlsEnabled`: `uint64` used to check the created logs to see if they're enabled. The log levels are expected to be used as integer flags, using values that are equal to the power of two: 2^0 (1), 2^1 (2), 2^2 (4), 2^3 (8), ...
 - [ErrorParser](log_levels.md#errorparser): function used to extract information from the errors given to `ErrorFrom` and `FatalFrom` methods. **If it's nil, an `error` will be thrown**
 
+You can set the `Logger` configuration using the `Configuration` method. Note that when you call this method from any `Logger` instance, all the `Loggers` that were created before it will point to the new `Configuration`.
+
 ## LvlsEnabled usage
 
 For every created log, the log `level` and the `Configuration.LvlsEnabled` will be compared using the bitwise `and` operator. If the result of the operation is `true`, the log is allowed to continue it's life cycle. If `false`, the log is not created and nothing happens (`noop`).

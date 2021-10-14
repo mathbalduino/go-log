@@ -16,11 +16,11 @@ You will need to install `go-log` before starting. To do it, execute the followi
 go get github.com/mathbalduino/go-log
 ```
 
-The library is built around the `Logger` struct type, that contains all the main methods:
+The library is built around the `Logger` interface type, that contains all the main methods:
 
 ```go
 // new.go
-type Logger struct {
+type Logger interface {
   ...
 }
 ```
@@ -29,14 +29,14 @@ Once you get a `Logger` instance, you're ready to throw `logs` by calling the co
 
 ```go
 // logLevels.go
-func (l *Logger) Trace(msg string, adHocFields ...LogFields)  { ... }
-func (l *Logger) Debug(msg string, adHocFields ...LogFields)  { ... }
-func (l *Logger) Info(msg string, adHocFields ...LogFields)   { ... }
-func (l *Logger) Warn(msg string, adHocFields ...LogFields)   { ... }
-func (l *Logger) Error(msg string, adHocFields ...LogFields)  { ... }
-func (l *Logger) Fatal(msg string, adHocFields ...LogFields)  { ... }
-func (l *Logger) ErrorFrom(e error, adHocFields ...LogFields) { ... }
-func (l *Logger) FatalFrom(e error, adHocFields ...LogFields) { ... }
+func Trace(msg string, adHocFields ...LogFields)  { ... }
+func Debug(msg string, adHocFields ...LogFields)  { ... }
+func Info(msg string, adHocFields ...LogFields)   { ... }
+func Warn(msg string, adHocFields ...LogFields)   { ... }
+func Error(msg string, adHocFields ...LogFields)  { ... }
+func Fatal(msg string, adHocFields ...LogFields)  { ... }
+func ErrorFrom(e error, adHocFields ...LogFields) { ... }
+func FatalFrom(e error, adHocFields ...LogFields) { ... }
 ```
 
 As you may have seen, this library contains some builtin [Log levels](basic-concepts/log_levels.md), but you can [customize it](basic-concepts/log_levels.md#extending-the-log-levels).

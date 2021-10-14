@@ -10,12 +10,12 @@ There are 6 basic log levels implemented by default:
 
 ```go
 // logLevels.go
-func (l *Logger) Trace(msg string, adHocFields ...LogFields) { ... }
-func (l *Logger) Debug(msg string, adHocFields ...LogFields) { ... }
-func (l *Logger) Info(msg string, adHocFields ...LogFields) { ... }
-func (l *Logger) Warn(msg string, adHocFields ...LogFields) { ... }
-func (l *Logger) Error(msg string, adHocFields ...LogFields) { ... }
-func (l *Logger) Fatal(msg string, adHocFields ...LogFields) { ... }
+func Trace(msg string, adHocFields ...LogFields) { ... }
+func Debug(msg string, adHocFields ...LogFields) { ... }
+func Info(msg string, adHocFields ...LogFields) { ... }
+func Warn(msg string, adHocFields ...LogFields) { ... }
+func Error(msg string, adHocFields ...LogFields) { ... }
+func Fatal(msg string, adHocFields ...LogFields) { ... }
 ```
 
 In order to call these methods, you will need a valid `Logger` instance. See [Logger creation](logger_creation.md) for details.

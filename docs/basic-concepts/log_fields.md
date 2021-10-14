@@ -52,10 +52,10 @@ A log is always created using the information from the `Logger` instance that cr
 
 Each one of them will be discussed in the following chapters. 
 
-:::note
+:::caution
 Since the `message` and `level` fields will always be present, if you try to set another field with the same `key` used by them, it will be **overridden**. Don't do it.
 :::
 
 :::tip
-You can customize the `key` used to represent the required fields using the [Configuration](configuration.md).
+You can customize the `key` used to represent the required fields (`msg` and `lvl`) using the [Configuration](configuration.md).
 :::

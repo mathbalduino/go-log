@@ -8,8 +8,8 @@ To create a new `Logger`, you can use these two functions exported by the root p
 
 ```go
 // new.go
-func New(config Configuration) *Logger { ... }
-func NewDefault() *Logger { ... }
+func New(config Configuration) Logger { ... }
+func NewDefault() Logger { ... }
 ```
 
 The first one will create an empty `Logger` (with the given `Configuration`), while the latter one will create a `Logger` using the [Default Configuration](configuration.md#default-configuration) and setting two outputs (in this order): 
