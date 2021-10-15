@@ -23,7 +23,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           // Please change this to your repo.
-          editUrl: 'https://github.com/mathbalduino/go-log/edit/main/docs/',
+          editUrl: 'https://github.com/mathbalduino/go-log/edit/docs/',
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
