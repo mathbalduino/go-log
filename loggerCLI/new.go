@@ -21,19 +21,13 @@ type loggerCLI struct {
 	baseLogger logger.Logger
 }
 
-func New(json, debug, trace bool) LoggerCLI {
+func New(json bool, lvlsEnabled uint64) LoggerCLI {
 	output := logger.OutputAnsiToStdout
 	if json {
 		output = logger.OutputJsonToWriter(os.Stdout, func(err error) { panic(fmt.Errorf("loggerCLI: %w", err)) })
 	}
 	conf := logger.DefaultConfig()
-	conf.LvlsEnabled = logger.LvlProduction
-	if debug {
-		conf.LvlsEnabled = conf.LvlsEnabled | logger.LvlDebug
-	}
-	if trace {
-		conf.LvlsEnabled = conf.LvlsEnabled | logger.LvlDebug | logger.LvlTrace
-	}
+	conf.LvlsEnabled = lvlsEnabled
 
 	return &loggerCLI{
 		logger.New(conf).
