@@ -12,12 +12,10 @@ func TestNew(t *testing.T) {
 		go func() {
 			defer func() {
 				e := recover()
-				if e == nil {
-					t.Fatalf("Expected some error")
-				}
-				calls += 1
-				if e.(error) != ErrLvlMsgSameKey {
-					t.Fatalf("Expected the correct error")
+				if e == nil || e.(error) != ErrLvlMsgSameKey {
+					t.Errorf("Expected the correct error")
+				} else {
+					calls += 1
 				}
 				c <- true
 			}()
@@ -26,6 +24,9 @@ func TestNew(t *testing.T) {
 		}()
 
 		<-c
+		if t.Failed() {
+			t.FailNow()
+		}
 		if calls != 1 {
 			t.Fatalf("Expected to call deferred function")
 		}
