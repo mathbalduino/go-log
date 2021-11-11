@@ -51,7 +51,7 @@ two arguments:
 If you're creating some CLI tool and want to provide Log Level customization via its flags, you can use the `ParseLogLevel`
 function, exported at the `loggerCLI` package, to parse a human-readable description of the log levels into the `uint64`.
 
-For details, see the [source code](github.com)
+For details, see the [source code](https://github.com/mathbalduino/go-log/blob/3a15937d71e4d2ae6519989ac505fffe80365202/loggerCLI/util.go#L28)
 :::
 
 ## Creating a CLI tool with LoggerCLI
