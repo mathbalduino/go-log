@@ -387,7 +387,7 @@ func TestOutputPanicOnFatal(t *testing.T) {
 			defer func() {
 				e := recover()
 				if e == nil || e != err {
-					t.Fatal("Not the expected error given to panic")
+					t.Errorf("Not the expected error given to panic")
 				}
 				c <- true
 			}()
@@ -396,6 +396,9 @@ func TestOutputPanicOnFatal(t *testing.T) {
 		}()
 
 		<-c
+		if t.Failed() {
+			t.FailNow()
+		}
 	})
 	t.Run("If LvlFatal and there's no error inside fields, use the log msg to create a new error", func(t *testing.T) {
 		errMsg := "some error"
@@ -404,7 +407,7 @@ func TestOutputPanicOnFatal(t *testing.T) {
 			defer func() {
 				e := recover()
 				if e == nil || e.(error).Error() != errMsg {
-					t.Fatal("Not the expected error message given to panic")
+					t.Errorf("Not the expected error message given to panic")
 				}
 				c <- true
 			}()
@@ -413,6 +416,9 @@ func TestOutputPanicOnFatal(t *testing.T) {
 		}()
 
 		<-c
+		if t.Failed() {
+			t.FailNow()
+		}
 	})
 }
 
