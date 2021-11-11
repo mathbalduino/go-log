@@ -16,7 +16,7 @@ jobs:
     - name: gofmt
       uses: Jerome1337/gofmt-action@v1.0.4
       with:
-        gofmt-path: './src'
+        gofmt-path: './'
         gofmt-flags: '-l -d -s -e'
 
     - name: go vet
