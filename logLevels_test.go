@@ -78,7 +78,7 @@ func TestLog(t *testing.T) {
 			t.Fatalf("Expected postFields to be nil")
 		}
 	}, wHandleLog))
-	t.Run("Should give the correct log to handleLog directly, if it's sync (nil AsyncScheduler)", func(t *testing.T) {
+	t.Run("Should give the correct log to handleLog directly, if it's sync (nil AsyncScheduler)", raceFreeTest(func(t *testing.T) {
 		lvl := LvlTrace
 		msg := "some msg"
 		adHocFields := []LogFields{
@@ -93,6 +93,9 @@ func TestLog(t *testing.T) {
 			configuration: &Configuration{LvlsEnabled: lvl},
 			preHooks:      Hooks{"i": fnI, "j": fnJ, "k": fnK},
 		}
+
+		oldHandleLog := handleLog
+		defer func() { handleLog = oldHandleLog }()
 		calls := 0
 		handleLog = func(receivedLog Log) {
 			calls += 1
@@ -120,7 +123,7 @@ func TestLog(t *testing.T) {
 		if calls != 1 {
 			t.Fatalf("Expected to call handleLog")
 		}
-	})
+	}, wHandleLog))
 	t.Run("Trace method should create a log with LvlTrace and forward msg and adHocFields", func(t *testing.T) {
 		msg := "some msg"
 		adHocFields := []LogFields{
