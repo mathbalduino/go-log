@@ -1,4 +1,4 @@
-# go-log [![Tests](https://github.com/mathbalduino/go-log/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/mathbalduino/go-log/actions/workflows/go.yml)
+# go-log [![Tests](https://github.com/mathbalduino/go-log/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/mathbalduino/go-log/actions/workflows/go.yml) [![codecov](https://codecov.io/gh/mathbalduino/go-log/branch/main/graph/badge.svg?token=X6MM6EFXGT)](https://codecov.io/gh/mathbalduino/go-log)
 
 Docs live at <a href="https://mathbalduino.com.br/go-log" target="_blank">mathbalduino.com.br/go-log</a>
 
