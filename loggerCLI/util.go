@@ -25,6 +25,10 @@ import (
 //
 // Note that the string is not expected to have blank spaces
 // in between the selected log levels
+//
+// This function accepts an extra string representing all
+// the log levels: "ALL". If the string contains "ALL", or
+// is equal to "ALL", all the log levels will be enabled
 func ParseLogLevel(str string) uint64 {
 	logLevels := uint64(0)
 	strLvls := strings.Split(str, "|")
@@ -48,8 +52,37 @@ func ParseLogLevel(str string) uint64 {
 		case "FATAL":
 			logLevels = logLevels | logger.LvlFatal
 			continue
+		case "ALL":
+			return logger.LvlAll
 		}
 	}
 
 	return logLevels
 }
+
+// ValidateLogLevels will take some string and check to see
+// if it's a valid LogLevels string.
+//
+// If the string contains anything not recognizable as a LogLevel,
+// the returned value will be false. Otherwise, returns true
+// and the string is safe to be used.
+//
+// Note that you can use this function to validate some CLI
+// flag value.
+func ValidateLogLevels(s string) bool {
+	strLvls := strings.Split(s, "|")
+	for _, strLvl := range strLvls {
+		if strLvl == "TRACE" || strLvl == "DEBUG" || strLvl == "INFO" || strLvl == "WARN" || strLvl == "ERROR" || strLvl == "FATAL" || strLvl == "ALL" {
+			continue
+		}
+		return false
+	}
+	return true
+}
+
+// LogLevelsValues is a constant that is intended to be used to describe
+// which values are accepted inside the LogLevels string.
+//
+// When building CLI tools, use this constant to provide "--help" information
+// about the flag that controls the log levels
+const LogLevelsValues = `"TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL", "ALL"`
