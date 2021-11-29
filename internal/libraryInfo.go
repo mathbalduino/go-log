@@ -9,8 +9,10 @@
 package internal
 
 // LibraryName holds the brand name of the library,
-// the name that's intended to be used in signatures,
-// etc (not directly related to code).
+// the name that's intended to be used in signatures, etc.
+//
+// Note that this constant does not directly affect
+// code execution
 const LibraryName = "go-log"
 
 // LibraryModulePath is the GO import path to the library.
