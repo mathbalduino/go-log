@@ -11,9 +11,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
     - uses: actions/setup-go@v2
       with:
         go-version: 1.17
+
+    - name: check LibraryModuleVersion variable value
+      run: .github/checkVersionVar.sh
 
     - name: gofmt
       uses: Jerome1337/gofmt-action@v1.0.4
