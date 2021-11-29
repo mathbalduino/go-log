@@ -23,4 +23,4 @@ const LibraryModulePath = "github.com/mathbalduino/go-log"
 //
 // It must be in sync with the actual library version,
 // since it will be used inside signatures
-const LibraryModuleVersion = "v1.3.0"
+const LibraryModuleVersion = "v1.3.1"
