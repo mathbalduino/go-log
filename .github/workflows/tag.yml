@@ -20,13 +20,16 @@ jobs:
         with:
           script: .github/getCodeVersion.sh
           result-encoding: string
+
       - name: Create new version tag
         uses: actions/github-script@v5
+        env:
+          TAG_NAME: ${{steps.code-version.outputs.result}}
         with:
           script: |
             github.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: "refs/tags/v${{steps.code-version.outputs.result}}",
+              ref: `refs/tags/v${process.env.TAG_NAME}`,
               sha: context.sha
             })
