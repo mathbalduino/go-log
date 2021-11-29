@@ -21,6 +21,9 @@ jobs:
         gofmt-path: './'
         gofmt-flags: '-l -d -s -e'
 
+    - name: check LibraryModuleVersion variable
+      run: .github/checkVersionVar.sh
+
     - name: go vet
       run: go vet ./...
 
