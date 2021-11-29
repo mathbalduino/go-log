@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CODE_VERSION=$(grep -Po 'const LibraryModuleVersion = "v\K[[:digit:]].[[:digit:]].[[:digit:]]' internal/libraryInfo.go)
+CODE_VERSION=$(.github/getCodeVersion.sh)
 CODE_MAJOR=$(echo $CODE_VERSION | cut -d '.' -f1)
 CODE_MINOR=$(echo $CODE_VERSION | cut -d '.' -f2)
 CODE_PATCH=$(echo $CODE_VERSION | cut -d '.' -f3)
