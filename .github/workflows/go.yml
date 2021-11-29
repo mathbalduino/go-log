@@ -21,8 +21,12 @@ jobs:
         gofmt-path: './'
         gofmt-flags: '-l -d -s -e'
 
+    - name: get latest tag
+      id: latest_tag
+      uses: "WyriHaximus/github-action-get-previous-tag@v1"
+
     - name: check LibraryModuleVersion variable
-      run: .github/checkVersionVar.sh
+      run: .github/checkVersionVar.sh ${{ steps.latest_tag.outputs.tag }}
 
     - name: go vet
       run: go vet ./...
