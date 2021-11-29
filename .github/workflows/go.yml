@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
     - uses: actions/setup-go@v2
       with:
         go-version: 1.17
@@ -21,12 +23,8 @@ jobs:
         gofmt-path: './'
         gofmt-flags: '-l -d -s -e'
 
-    - name: get latest tag
-      id: latest_tag
-      uses: "WyriHaximus/github-action-get-previous-tag@v1"
-
     - name: check LibraryModuleVersion variable
-      run: .github/checkVersionVar.sh ${{ steps.latest_tag.outputs.tag }}
+      run: .github/checkVersionVar.sh
 
     - name: go vet
       run: go vet ./...
