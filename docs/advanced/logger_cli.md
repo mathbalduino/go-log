@@ -45,7 +45,7 @@ Using the `New` function, at the package `loggerCLI`, you can get a new `LoggerC
 two arguments: 
 
 1. `json`: Controls the output. If true, it will print one log per line, parsed as `json` object
-2. `lvlsEnabled`: An `uint64` value, that represents the [Log Levels](../basic-concepts/log_levels.md)
+2. `lvlsEnabled`: An `uint64` value, that represents the [Log Levels](../basic-concepts/log_levels.md) (see [ParseLogLevel](#parseloglevel))
 
 :::tip
 If you're creating some CLI tool and want to provide Log Level customization via its flags, you can use the `ParseLogLevel`
@@ -54,7 +54,7 @@ function, exported at the `loggerCLI` package, to parse a human-readable descrip
 For details, see the [source code](https://github.com/mathbalduino/go-log/blob/3a15937d71e4d2ae6519989ac505fffe80365202/loggerCLI/util.go#L28)
 :::
 
-## Creating a CLI tool with LoggerCLI
+## Nesting logs
 
 Logs created by the `LoggerCLI` are intended to be nested, so, the API is built in a way that makes it possible. Every 
 log level method will return another instance of `LoggerCLI`, that will nest its own logs inside the `LoggerCLI` that 
@@ -87,4 +87,63 @@ lvl1.Warn("Lvl 1 - again")
 :::tip
 Don't forget that it's recommended to create, at least, one CLI Flag: `--json`. The value of this flag should be forwarded 
 to the `New` function, easing the pipe of the output to the `beautify` package
+:::
+
+## Helpers
+
+When dealing with the`LoggerCLI` in a CLI tool, for example, you will find that it's very boring to parse/read string
+values that the user have passed via CLI flags, to configure the `LoggerCLI` instance. To help you with this boilerplate
+code, there's some helper functions/constants that you can use.
+
+### ParseLogLevel
+
+```go
+func ParseLogLevel(str string) uint64 { ... }
+```
+
+This function will take some `string` and return the equivalent Log Levels that should be enabled. The structure of the
+`string` is very simple: the log level names separated by "|", without spaces. Example:
+
+```sh
+your-CLI-tool --some-flag=1 --log-levels="DEBUG|WARN|FATAL" --other-flag="some string"
+```
+
+The value of the `--log-levels` flag, when given to the `ParseLogLevel` function, will return the `uint64` that enables
+the `DEBUG`, `WARN` and `FATAL` log levels.
+
+:::tip
+You can pass the `ParseLogLevel` returned value directly to the `loggerCLI.New` function
+:::
+
+:::note
+The `ParseLogLevel` function accepts the value "ALL", that enables all log levels. This way, you don't need to set the
+`--log-levels` flag value to `"TRACE|DEBUG|INFO|WARN|ERROR|FATAL"`, just set to `"ALL"` (considering the example above)
+:::
+
+### ValidateLogLevels
+
+```go
+func ValidateLogLevels(s string) bool { ... }
+```
+
+This function will return a `boolean` indicating whether the given `string` is a valid log levels `string` or not. If
+`true`, the `string` can be safely used. Otherwise, its behaviour is undefined.
+
+:::caution
+Always test any `string` that represents log levels before using it, because since `ParseLogLevel` don't return errors,
+it will silently misbehave
+:::
+
+### LogLevelsValues
+
+```go
+const LogLevelsValues = `"TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL", "ALL"`
+```
+
+This `const` is intended to be used in `--help` messages in CLI tools. You can safely display the content of this string
+when telling to the user which values he can use inside the log level `string`. 
+
+:::caution
+Always use this `const` `string` instead of hard-coding the message all by yourself. If the API changes and you're using
+this `string`, the changes will be automatically reflect in your code
 :::
