@@ -17,14 +17,14 @@ jobs:
       with:
         go-version: 1.17
 
+    - name: check LibraryModuleVersion variable value
+      run: .github/checkVersionVar.sh
+
     - name: gofmt
       uses: Jerome1337/gofmt-action@v1.0.4
       with:
         gofmt-path: './'
         gofmt-flags: '-l -d -s -e'
-
-    - name: check LibraryModuleVersion variable value
-      run: .github/checkVersionVar.sh
 
     - name: go vet
       run: go vet ./...
