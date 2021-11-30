@@ -17,7 +17,7 @@ jobs:
       with:
         go-version: 1.17
 
-    - name: check LibraryModuleVersion variable value
+    - name: Check LibraryModuleVersion variable value
       run: .github/checkVersionVar.sh
 
     - name: gofmt
@@ -32,7 +32,8 @@ jobs:
     - name: go test
       run: go test -v -coverprofile=coverage.txt -covermode=atomic ./...
 
-    - uses: codecov/codecov-action@v2
+    - name: Upload coverage
+      uses: codecov/codecov-action@v2
       with:
         files: ./coverage.txt
         fail_ci_if_error: true

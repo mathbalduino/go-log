@@ -15,21 +15,19 @@ jobs:
         with:
           go-version: 1.17
 
-      - uses: actions/github-script@v5
-        id: code-version
-        with:
-          script: .github/getCodeVersion.sh
-          result-encoding: string
+      - name: Read new version
+        id: read_code_step
+        run: echo "::set-output name=code_version::$(.github/checkVersionVar.sh)"
 
-      - name: Create new version tag
+      - name: Create new version Tag
         uses: actions/github-script@v5
         env:
-          TAG_NAME: ${{steps.code-version.outputs.result}}
+          TAG_NAME: ${{steps.read_code_step.outputs.code_version}}
         with:
           script: |
             github.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: `refs/tags/testetag`,
+              ref: `refs/tags/v${process.env.TAG_NAME}`,
               sha: context.sha
             })
