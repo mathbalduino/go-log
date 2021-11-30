@@ -25,7 +25,7 @@ jobs:
           TAG_NAME: ${{steps.read_code_step.outputs.code_version}}
         with:
           script: |
-            github.git.createRef({
+            github.rest.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: `refs/tags/v${process.env.TAG_NAME}`,
