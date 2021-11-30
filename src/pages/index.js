@@ -23,8 +23,8 @@ function HomepageHeader() {
             Read the Introduction 📜
           </Link>
         </div>
-        <Link to='https://github.com/mathbalduino/go-log/actions/workflows/go.yml'>
-          <img src="https://github.com/mathbalduino/go-log/actions/workflows/go.yml/badge.svg?branch=main" />
+        <Link to='https://github.com/mathbalduino/go-log/actions/workflows/ci.yml'>
+          <img src="https://github.com/mathbalduino/go-log/actions/workflows/ci.yml/badge.svg?branch=main" />
         </Link>
         &nbsp; &nbsp;
         <Link to='https://codecov.io/gh/mathbalduino/go-log'>
