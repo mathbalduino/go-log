@@ -17,7 +17,7 @@ jobs:
 
       - name: Read new version
         id: read_code_step
-        run: echo "::set-output name=code_version::$(.github/checkVersionVar.sh)"
+        run: echo "::set-output name=code_version::$(.github/getCodeVersion.sh)"
 
       - name: Create new version Tag
         uses: actions/github-script@v5
