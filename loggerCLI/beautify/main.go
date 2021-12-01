@@ -12,7 +12,7 @@ func main() {
 	logs := readParseLogs()
 	orderLogs(logs)
 	tree := buildTree(logs)
-	treeStr := treeToString(tree, 0)
+	treeStr := treeToString(tree, "")
 	fmt.Println(treeStr)
 }
 

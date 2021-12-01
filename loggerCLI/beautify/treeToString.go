@@ -14,14 +14,13 @@ import (
 	"strings"
 )
 
-func treeToString(tree []treeNode, treeDepth int) string {
+func treeToString(tree []treeNode, indentation string) string {
 	finalStrB := strings.Builder{}
 	for i, log := range tree {
 		isLast := i == len(tree)-1
 
-		// Builds visual indentation prefix
-		if treeDepth > 0 {
-			finalStrB.WriteString(strings.Repeat("   ", treeDepth-1))
+		finalStrB.WriteString(indentation)
+		if log.parentPtr != nil {
 			if isLast {
 				finalStrB.WriteString(logger.ColorizeStrByLvl(log.parentPtr.Lvl, "'--"))
 			} else {
@@ -29,45 +28,37 @@ func treeToString(tree []treeNode, treeDepth int) string {
 			}
 		}
 
-		// Builds the actual prefix of the log level
 		lvlPrefix := fmt.Sprintf("[ %s ] ", logger.LvlToString(log.Lvl))
 		finalStrB.WriteString(logger.ColorizeStrByLvl(log.Lvl, lvlPrefix))
 
-		// Message new lines indentation
-		msgIndentation := strings.Repeat("   ", treeDepth)
-		if msgIndentation != "" && isLast {
-			msgIndentation = strings.TrimSuffix(msgIndentation, "   ") + "¨  "
-		}
-		if len(log.childs) > 0 {
-			msgIndentation += logger.ColorizeStrByLvl(log.Lvl, "|  ")
-		} else {
-			msgIndentation += "   "
-		}
-
-		// Builds message
-		msg := strings.Split(log.Msg, "\n")
-		for i, m := range msg {
+		splitMsg := strings.Split(log.Msg, "\n")
+		for i, m := range splitMsg {
 			finalStrB.WriteString(logger.ColorizeStrByLvl(log.Lvl, m))
-			if i < (len(msg) - 1) {
+			if i < (len(splitMsg) - 1) {
 				finalStrB.WriteString("\n")
-				finalStrB.WriteString(msgIndentation)
+				finalStrB.WriteString(indentation)
+				if log.parentPtr != nil {
+					if isLast {
+						finalStrB.WriteString(logger.ColorizeStrByLvl(log.parentPtr.Lvl, "   "))
+					} else {
+						finalStrB.WriteString(logger.ColorizeStrByLvl(log.parentPtr.Lvl, "|  "))
+					}
+				}
+				finalStrB.WriteString("   ")
 			}
 		}
 		finalStrB.WriteString("\n")
 
-		// Build the child strings
-		childStr := treeToString(log.childs, treeDepth+1)
-		if len(log.childs) > 1 {
-			childStr = strings.ReplaceAll(
-				childStr,
-				"\n"+strings.Repeat("   ", treeDepth)+" ",
-				"\n"+strings.Repeat("   ", treeDepth)+logger.ColorizeStrByLvl(log.Lvl, "|"))
+		newIndentation := ""
+		if log.parentPtr != nil {
+			if isLast {
+				newIndentation = indentation + logger.ColorizeStrByLvl(log.parentPtr.Lvl, "   ")
+			} else {
+				newIndentation = indentation + logger.ColorizeStrByLvl(log.parentPtr.Lvl, "|  ")
+			}
 		}
-		if len(log.childs) > 0 {
-			childStr = strings.ReplaceAll(childStr, "¨  ", "   ")
-		}
+		childStr := treeToString(log.childs, newIndentation)
 		finalStrB.WriteString(childStr)
 	}
-
 	return finalStrB.String()
 }
