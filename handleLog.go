@@ -68,6 +68,14 @@ func (l Log) Field(key string) interface{} {
 //
 // Using var just to ease tests
 var handleLog = func(log Log) {
+	defer func() {
+		if log.logger.configuration.AsyncScheduler == nil {
+			return
+		}
+		// Ignore any panics that may happen here, if it is async
+		recover()
+	}()
+
 	logFields := cloneOrNew(log.logger.fields)
 	mergeOverriding(logFields, log.preFields)
 	mergeOverriding(logFields, log.adHocFields...)

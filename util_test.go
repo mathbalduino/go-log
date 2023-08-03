@@ -160,7 +160,7 @@ func TestTryRead(t *testing.T) {
 
 func TestCloneOrNew(t *testing.T) {
 	t.Run("If the given fields is empty/nil, return a new, non-nil, empty fields", func(t *testing.T) {
-		f := cloneOrNew(nil)
+		f := cloneOrNew((LogFields)(nil))
 		if f == nil {
 			t.Fatalf("Not expected to be nil")
 		}
@@ -197,7 +197,7 @@ func TestCloneOrNew(t *testing.T) {
 
 func TestCloneOrNew_(t *testing.T) {
 	t.Run("If the given hooks param is empty/nil, return a new, non-nil, empty hooks", func(t *testing.T) {
-		f := cloneOrNew_(nil)
+		f := cloneOrNew((Hooks)(nil))
 		if f == nil {
 			t.Fatalf("Not expected to be nil")
 		}
@@ -205,7 +205,7 @@ func TestCloneOrNew_(t *testing.T) {
 			t.Fatalf("Expected to return an empty Hooks")
 		}
 
-		f = cloneOrNew_(Hooks{})
+		f = cloneOrNew(Hooks{})
 		if f == nil {
 			t.Fatalf("Not expected to be nil")
 		}
@@ -215,7 +215,7 @@ func TestCloneOrNew_(t *testing.T) {
 	})
 	t.Run("Should always return a new, different Hooks", func(t *testing.T) {
 		p := Hooks{}
-		f := cloneOrNew_(p)
+		f := cloneOrNew(p)
 		if reflect.ValueOf(p).Pointer() == reflect.ValueOf(f).Pointer() {
 			t.Fatalf("Expected to return a different map, not the same")
 		}
@@ -225,7 +225,7 @@ func TestCloneOrNew_(t *testing.T) {
 		fnB := func(log Log) interface{} { return nil }
 		fnC := func(log Log) interface{} { return nil }
 		p := Hooks{"a": fnA, "b": fnB, "c": fnC}
-		f := cloneOrNew_(p)
+		f := cloneOrNew(p)
 		if reflect.ValueOf(p).Pointer() == reflect.ValueOf(f).Pointer() {
 			t.Fatalf("Expected to return a different map, not the same")
 		}
@@ -245,6 +245,14 @@ func TestMergeOverriding(t *testing.T) {
 			t.Fatalf("Not expected to apply side effects to the dest param")
 		}
 	})
+	t.Run("If the len of the variadic param is zero, just exit, ignoring the dest param", func(t *testing.T) {
+		fnA := func(log Log) interface{} { return nil }
+		dest := Hooks{"a": fnA}
+		mergeOverriding(dest)
+		if len(dest) != 1 || reflect.ValueOf(dest["a"]).Pointer() != reflect.ValueOf(fnA).Pointer() {
+			t.Fatalf("Not expected to apply side effects to the dest param")
+		}
+	})
 	t.Run("Should copy all the variadic params to the dest param. The later always overrides the previous", func(t *testing.T) {
 		dest := LogFields{"a": "aaa"}
 		mergeOverriding(dest,
@@ -256,38 +264,6 @@ func TestMergeOverriding(t *testing.T) {
 			t.Fatalf("The dest arg doesn't have the correct len")
 		}
 		if dest["a"] != "AAA" || dest["c"] != "CCC" || dest["t"] != "TTT" || dest["p"] != "ppp" || dest["d"] != "ddd" {
-			t.Fatalf("The dest arg doesn't contains the correct overrided values")
-		}
-	})
-}
-
-func TestMergeOverriding_(t *testing.T) {
-	t.Run("If the len of the variadic param is zero, just exit, ignoring the dest param", func(t *testing.T) {
-		fnA := func(log Log) interface{} { return nil }
-		dest := Hooks{"a": fnA}
-		mergeOverriding_(dest)
-		if len(dest) != 1 || reflect.ValueOf(dest["a"]).Pointer() != reflect.ValueOf(fnA).Pointer() {
-			t.Fatalf("Not expected to apply side effects to the dest param")
-		}
-	})
-	t.Run("Should copy just the FIRST variadic param to the dest param, overriding", func(t *testing.T) {
-		fnA := func(log Log) interface{} { return nil }
-		fnAA := func(log Log) interface{} { return nil }
-		fnB := func(log Log) interface{} { return nil }
-		fnC := func(log Log) interface{} { return nil }
-		fnD := func(log Log) interface{} { return nil }
-		fnE := func(log Log) interface{} { return nil }
-		dest := Hooks{"a": fnA}
-		mergeOverriding_(dest,
-			Hooks{"b": fnB, "a": fnAA},
-			Hooks{"d": fnD},
-			Hooks{"b": fnC, "e": fnE},
-			Hooks{"a": fnAA, "d": nil})
-		if len(dest) != 2 {
-			t.Fatalf("The dest arg doesn't have the correct len")
-		}
-		if reflect.ValueOf(dest["a"]).Pointer() != reflect.ValueOf(fnAA).Pointer() ||
-			reflect.ValueOf(dest["b"]).Pointer() != reflect.ValueOf(fnB).Pointer() {
 			t.Fatalf("The dest arg doesn't contains the correct overrided values")
 		}
 	})

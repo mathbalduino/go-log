@@ -30,14 +30,7 @@ func (l *logger) Log(lvl uint64, msg string, adHocFields []LogFields) {
 		return
 	}
 
-	log := Log{
-		lvl,
-		msg,
-		l,
-		nil,
-		adHocFields,
-		nil,
-	}
+	log := Log{lvl, msg, l, nil, adHocFields, nil}
 	if len(l.preHooks) > 0 {
 		log.preFields = LogFields{}
 		applyHooks(log, log.preFields, l.preHooks)

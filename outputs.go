@@ -78,8 +78,7 @@ func OutputJsonToWriter(w io.Writer, onError func(error)) Output {
 // os.Stdout, using ANSI codes to colorize it accordingly to
 // the log level
 func OutputAnsiToStdout(lvl uint64, msg string, _ LogFields) {
-	fmt.Printf(
-		ColorizeStrByLvl(lvl, "[ %s ] %s")+"\n",
+	fmt.Printf(ColorizeStrByLvl(lvl, "[ %s ] %s\n"),
 		LvlToString(lvl), strings.ReplaceAll(msg, "\n", "\n\t"))
 }
 

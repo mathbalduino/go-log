@@ -370,7 +370,7 @@ func TestOutputToAnsiStdout(t *testing.T) {
 		if e != nil {
 			t.Fatalf("Error not expected")
 		}
-		if string(b) != ColorizeStrByLvl(LvlError, "[ ERROR ] some msg")+"\n" {
+		if string(b) != ColorizeStrByLvl(LvlError, "[ ERROR ] some msg\n") {
 			t.Fatalf("Expected a different msg")
 		}
 	}, wStdOut))
