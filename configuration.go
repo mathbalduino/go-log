@@ -46,8 +46,7 @@ func DefaultConfig() Configuration {
 		"lvl",
 		"msg",
 		LvlDefaults,
-		DefaultErrorParser,
-	}
+		DefaultErrorParser}
 }
 
 // DefaultErrorParser will return a tuple containing the error string

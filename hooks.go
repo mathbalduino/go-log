@@ -7,7 +7,7 @@ type Hooks = map[string]func(Log) interface{}
 
 func (l *logger) PreHooks(hooks Hooks) Logger {
 	newLogger := cloneLogger(l)
-	mergeOverriding_(newLogger.preHooks, hooks)
+	mergeOverriding(newLogger.preHooks, hooks)
 	return newLogger
 }
 
@@ -19,7 +19,7 @@ func (l *logger) RawPreHooks(hooks Hooks) Logger {
 
 func (l *logger) PostHooks(hooks Hooks) Logger {
 	newLogger := cloneLogger(l)
-	mergeOverriding_(newLogger.postHooks, hooks)
+	mergeOverriding(newLogger.postHooks, hooks)
 	return newLogger
 }
 
