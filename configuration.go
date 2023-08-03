@@ -43,11 +43,19 @@ func (l *logger) Configuration(c Configuration) { l.configuration = &c }
 func DefaultConfig() Configuration {
 	return Configuration{
 		nil,
-		"lvl",
-		"msg",
+		DefaultLvlKey,
+		DefaultMsgKey,
 		LvlDefaults,
 		DefaultErrorParser}
 }
+
+// DefaultLvlKey is the key used to store the level of
+// the log, inside the fields maps
+const DefaultLvlKey = "lvl"
+
+// DefaultMsgKey is the key used to store the message of
+// the log, inside the fields maps
+const DefaultMsgKey = "msg"
 
 // DefaultErrorParser will return a tuple containing the error string
 // and the following map: { "error": err }
@@ -55,8 +63,8 @@ func DefaultErrorParser(err error) (string, LogFields) {
 	return err.Error(), LogFields{DefaultErrorKey: err}
 }
 
-// DefaultErrorKey is the value of the key used
-// to store the errors returned by the DefaultErrorParser
+// DefaultErrorKey is the key used to store the errors returned
+// by the DefaultErrorParser, inside the fields map
 const DefaultErrorKey = "error"
 
 // validateConfig will return a non-nil error

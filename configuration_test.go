@@ -26,15 +26,15 @@ func TestDefaultConfig(t *testing.T) {
 			t.Fatalf("Expected to return a synchronous configuration")
 		}
 	})
-	t.Run("Level field should be 'lvl'", func(t *testing.T) {
+	t.Run("Level field should be equal to the DefaultLvlKey const", func(t *testing.T) {
 		c := DefaultConfig()
-		if c.LvlFieldName != "lvl" {
+		if c.LvlFieldName != DefaultLvlKey {
 			t.Fatalf("Expected a configuration with the level field set to 'lvl'")
 		}
 	})
-	t.Run("Message field should be 'msg'", func(t *testing.T) {
+	t.Run("Message field should be equal to the DefaultMsgKey const", func(t *testing.T) {
 		c := DefaultConfig()
-		if c.MsgFieldName != "msg" {
+		if c.MsgFieldName != DefaultMsgKey {
 			t.Fatalf("Expected a configuration with the message field set to 'msg'")
 		}
 	})

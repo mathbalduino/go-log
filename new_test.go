@@ -34,8 +34,8 @@ func TestNew(t *testing.T) {
 	t.Run("Should set a pointer to the given configuration and nil to the others", func(t *testing.T) {
 		errorParser := func(err error) (string, LogFields) { return "", nil }
 		lvlsEnabled := LvlFatal
-		lvl := "lvl"
-		msg := "msg"
+		lvl := DefaultLvlKey
+		msg := DefaultMsgKey
 		m := &mockAsyncScheduler{}
 		l := New(Configuration{m, lvl, msg, lvlsEnabled, errorParser}).(*logger)
 		if l.configuration == nil || l.outputs != nil || l.preHooks != nil || l.postHooks != nil || l.fields != nil {
