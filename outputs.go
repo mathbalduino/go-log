@@ -79,7 +79,7 @@ func OutputJsonToWriter(w io.Writer, onError func(error)) Output {
 // the log level
 func OutputAnsiToStdout(lvl uint64, msg string, _ LogFields) {
 	fmt.Printf(ColorizeStrByLvl(lvl, "[ %s ] %s\n"),
-		LvlToString(lvl), strings.ReplaceAll(msg, "\n", "\n    "))
+		LvlToString(lvl), strings.ReplaceAll(strings.ReplaceAll(msg, "\n", "\n\t"), "\t", "    "))
 }
 
 // OutputPanicOnFatal will call "panic" if the lvl of the given log
