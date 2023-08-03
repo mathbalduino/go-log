@@ -1,4 +1,4 @@
-package logger
+package golog
 
 func (l *logger) Trace(msg string, adHocFields ...LogFields) { l.Log(LvlTrace, msg, adHocFields) }
 func (l *logger) Debug(msg string, adHocFields ...LogFields) { l.Log(LvlDebug, msg, adHocFields) }

@@ -1,4 +1,4 @@
-package logger
+package golog
 
 // Hooks is just an alias to a map that represents
 // dynamic fields of the log (values are evaluated

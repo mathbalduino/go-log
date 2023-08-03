@@ -1,4 +1,4 @@
-package logger
+package golog
 
 // Configuration is a struct that holds
 // global src configurations

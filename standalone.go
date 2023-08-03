@@ -1,4 +1,4 @@
-package logger
+package golog
 
 // Trace will create a new log with the Trace level, if enabled,
 // applying the given adHocFields.

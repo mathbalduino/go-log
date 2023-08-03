@@ -7,7 +7,7 @@ import (
 )
 
 func nestLogger(l *loggerCLI) *loggerCLI {
-	fields := logger.LogFields{timestampFieldName: fmt.Sprintf("%d", time.Now().UnixNano())}
+	fields := golog.LogFields{timestampFieldName: fmt.Sprintf("%d", time.Now().UnixNano())}
 	parent := l.baseLogger.Field(timestampFieldName)
 	if parent != nil {
 		fields[parentFieldName] = parent

@@ -1,4 +1,4 @@
-package logger
+package golog
 
 // LvlToString will take the given log level and
 // return the string that represents it

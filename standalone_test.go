@@ -6,7 +6,7 @@
 // Live at mathbalduino.com.br
 // 2021-11-16 11:02 AM
 
-package logger
+package golog
 
 import (
 	"fmt"
