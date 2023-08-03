@@ -18,19 +18,19 @@ type LoggerCLI interface {
 }
 
 type loggerCLI struct {
-	baseLogger logger.Logger
+	baseLogger golog.Logger
 }
 
 func New(json bool, lvlsEnabled uint64) LoggerCLI {
-	output := logger.OutputAnsiToStdout
+	output := golog.OutputAnsiToStdout
 	if json {
-		output = logger.OutputJsonToWriter(os.Stdout, func(err error) { panic(fmt.Errorf("loggerCLI: %w", err)) })
+		output = golog.OutputJsonToWriter(os.Stdout, func(err error) { panic(fmt.Errorf("loggerCLI: %w", err)) })
 	}
-	conf := logger.DefaultConfig()
+	conf := golog.DefaultConfig()
 	conf.LvlsEnabled = lvlsEnabled
 
 	return &loggerCLI{
-		logger.New(conf).
-			RawOutputs(output, logger.OutputPanicOnFatal),
+		golog.New(conf).
+			RawOutputs(output, golog.OutputPanicOnFatal),
 	}
 }

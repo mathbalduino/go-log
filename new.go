@@ -1,4 +1,4 @@
-package logger
+package golog
 
 type Logger interface {
 	// Field acts as a getter for base fields.
