@@ -13,13 +13,13 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-go@v2
         with:
-          go-version: 1.17
+          go-version: 1.20
 
       - name: Check LibraryModuleVersion variable value
         run: .github/checkVersionVar.sh
 
       - name: gofmt
-        uses: Jerome1337/gofmt-action@v1.0.4
+        uses: Jerome1337/gofmt-action@v1.0.5
         with:
           gofmt-path: './'
           gofmt-flags: '-l -d -s -e'
